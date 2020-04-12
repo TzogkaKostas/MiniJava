@@ -5,6 +5,17 @@ public class FunctionInfo {
 	Identifiers parameters;
 	Identifiers variables;
 
+	public FunctionInfo(String returnType) {
+		this.returnType = returnType;
+	}
+
+	public FunctionInfo(String returnType, Identifiers parameters,
+		Identifiers variables) {
+		this.returnType = returnType;
+		this.parameters = parameters;
+		this.variables = variables;
+	}
+
 	public void insertParameter(String name, String type) {
 		parameters.insert(name, type);
 	}
@@ -25,9 +36,35 @@ public class FunctionInfo {
 		this.returnType = returnType;
 	}
 
+	public String getReturnType() {
+		return this.returnType;
+	}
+
+	public void setReturnType(String returnType) {
+		this.returnType = returnType;
+	}
+
+	public Identifiers getParameters() {
+		return this.parameters;
+	}
+
+	public void setParameters(Identifiers parameters) {
+		this.parameters = parameters;
+	}
+
+	public Identifiers getVariables() {
+		return this.variables;
+	}
+
+	public void setVariables(Identifiers variables) {
+		this.variables = variables;
+	}
+
 	public void print() {
-		System.out.println(returnType);
+		System.out.println(" returns " + returnType);
+		System.out.print("Params: ");
 		parameters.print();
+		System.out.print("Var Declaration: ");
 		variables.print();
 	}
 

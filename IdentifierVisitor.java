@@ -2,40 +2,105 @@ import syntaxtree.*;
 import visitor.GJDepthFirst;
 import SymbolTable.*;
 
-public class IdentifierVisitor extends GJDepthFirst<String, String>{
+public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	SymbolTable symbolTable = new SymbolTable();
-	// ClassInfo classInfo = new ClassInfo();
-	// FunctionInfo functionInfo = new FunctionInfo();
-	Identifiers identifiers;
-	
-	public void print() {
-		// symbolTable.printClassesNames();
-		symbolTable.print();
+
+	public SymbolTable getSymbolTable() {
+		return this.symbolTable;
 	}
 
-
-   /**
-    * f0 -> "class"
-    * f1 -> Identifier()
-    * f2 -> "{"
-    * f3 -> ( VarDeclaration() )*
-    * f4 -> ( MethodDeclaration() )*
-    * f5 -> "}"
-    */
-	public String visit(ClassDeclaration n, String argu) {
-		String MainClassName = n.f1.accept(this, argu);
-
-        identifiers = new Identifiers();
-		n.f3.accept(this, argu);
-
-		n.f4.accept(this, argu);
-
-		ClassInfo classInfo = new ClassInfo("", identifiers);
-		symbolTable.insertClass(MainClassName, classInfo);
-		return MainClassName;
+	/**
+	* f0 -> MainClass()
+	* f1 -> ( TypeDeclaration() )*
+	* f2 -> <EOF>
+	*/
+	public Object visit(Goal n, Object argu) {
+		ClassInfo mainClassInfo = new ClassInfo();
+		String mainClassName = (String) n.f0.accept(this, mainClassInfo);
+		symbolTable.insertClass(mainClassName, mainClassInfo);
+		n.f1.accept(this, null);
+		return null;
 	}
 
-	   /**
+   	/**
+	* f0 -> "class"
+	* f1 -> Identifier()
+	* f2 -> "{"
+	* f3 -> "public"
+	* f4 -> "static"
+	* f5 -> "void"
+	* f6 -> "main"
+	* f7 -> "("
+	* f8 -> "String"
+	* f9 -> "["
+	* f10 -> "]"
+	* f11 -> Identifier()
+	* f12 -> ")"
+	* f13 -> "{"
+	* f14 -> ( VarDeclaration() )*
+	* f15 -> ( Statement() )*
+	* f16 -> "}"
+	* f17 -> "}"
+	*/
+	public Object visit(MainClass n, Object argu) {
+		String className = (String) n.f1.accept(this, null);
+		String argsName = (String) n.f11.accept(this, null);
+		
+		Identifiers identifiers = new Identifiers();
+		n.f14.accept(this, identifiers);
+
+		ClassInfo classInfo = new ClassInfo(className, argsName, identifiers);
+		symbolTable.insertClass(className, classInfo);
+		return null;
+	 }
+
+	/**
+	* f0 -> "class"
+	* f1 -> Identifier()
+	* f2 -> "{"
+	* f3 -> ( VarDeclaration() )*
+	* f4 -> ( MethodDeclaration() )*
+	* f5 -> "}"
+	*/
+	public Object visit(ClassDeclaration n, Object argu) {
+		String className = (String) n.f1.accept(this, argu);
+
+		Identifiers variables = new Identifiers();
+		n.f3.accept(this, variables);
+
+		ClassInfo classInfo = new ClassInfo("", variables);
+
+		n.f4.accept(this, classInfo);
+
+		symbolTable.insertClass(className, classInfo);
+		return null;
+	 }
+  
+	/**
+	 * f0 -> "class"
+	* f1 -> Identifier()
+	* f2 -> "extends"
+	* f3 -> Identifier()
+	* f4 -> "{"
+	* f5 -> ( VarDeclaration() )*
+	* f6 -> ( MethodDeclaration() )*
+	* f7 -> "}"
+	*/
+	public Object visit(ClassExtendsDeclaration n, Object argu) {
+		String className = (String) n.f1.accept(this, argu);
+
+		Identifiers variables = new Identifiers();
+		n.f5.accept(this, variables);
+
+		ClassInfo classInfo = new ClassInfo("extends", variables);
+
+		n.f6.accept(this, classInfo);
+
+		symbolTable.insertClass(className, classInfo);
+		return null;
+	}
+
+	/**
     * f0 -> "public"
     * f1 -> Type()
     * f2 -> Identifier()
@@ -50,41 +115,85 @@ public class IdentifierVisitor extends GJDepthFirst<String, String>{
     * f11 -> ";"
     * f12 -> "}"
     */
-	public R visit(MethodDeclaration n, A argu) {
-		R _ret=null;
-		n.f0.accept(this, argu);
-		n.f1.accept(this, argu);
-		n.f2.accept(this, argu);
-		n.f3.accept(this, argu);
+	public Object visit(MethodDeclaration n, Object argu) {
+		ClassInfo classInfo = (ClassInfo) argu;
+		String returnType = (String) n.f1.accept(this, argu);
+		String functionName = (String) n.f2.accept(this, argu);
+
+		FunctionInfo functionInfo = new FunctionInfo(returnType);
+
+		Identifiers parameters = new Identifiers();
 		n.f4.accept(this, argu);
-		n.f5.accept(this, argu);
-		n.f6.accept(this, argu);
-		n.f7.accept(this, argu);
-		n.f8.accept(this, argu);
-		n.f9.accept(this, argu);
-		n.f10.accept(this, argu);
-		n.f11.accept(this, argu);
-		n.f12.accept(this, argu);
-		return _ret;
+		functionInfo.setParameters(parameters);
+
+		Identifiers variables = new Identifiers();
+		n.f7.accept(this, variables);
+		functionInfo.setVariables(variables);
+
+		classInfo.insertFunction(functionName, functionInfo);
+		return null;
+	}
+
+   	/**
+    * f0 -> FormalParameter()
+    * f1 -> FormalParameterTail()
+    */
+	public Object visit(FormalParameterList n, Object argu) {
+		Identifiers identifiers = (Identifiers) argu;
+		String[] strArray = (String[]) n.f0.accept(this, null);
+		identifiers.insert(strArray[0], strArray[1]);
+		n.f1.accept(this, argu);
+		return null;
+	}
+  
+	/**
+	* f0 -> Type()
+	* f1 -> Identifier()
+	*/
+	public Object visit(FormalParameter n, Object argu) {
+		String strArray[] = new String[2];
+		strArray[0] = (String) n.f0.accept(this, null);
+		strArray[1] = (String) n.f1.accept(this, null);
+		return strArray;
+	}
+  
+	/**
+	* f0 -> ( FormalParameterTerm() )*
+	*/
+	// public Object visit(FormalParameterTail n, Object argu) {
+		// return n.f0.accept(this, argu);
+	// }
+  
+	/**
+	* f0 -> ","
+	* f1 -> FormalParameter()
+	*/
+	public Object visit(FormalParameterTerm n, Object argu) {
+		Identifiers identifiers = (Identifiers) argu;
+		String[] strArray = (String[]) n.f0.accept(this, null);
+		identifiers.insert(strArray[0], strArray[1]);
+		return null;
 	}
 
 	/**
-	 * f0 -> Type() f1 -> Identifier() f2 -> ";"
-	 */
-	public String visit(VarDeclaration n, String argu) {
-		String type = n.f0.accept(this, argu);
-		String id = n.f1.accept(this, argu);
+	* f0 -> Type()
+	* f1 -> Identifier()
+	* f2 -> ";"
+	*/
+	public Object visit(VarDeclaration n, Object argu) {
+		Identifiers identifiers = (Identifiers) argu;
+		String type = (String) n.f0.accept(this, null);
+		String id = (String) n.f1.accept(this, null);
 		identifiers.insert(id, type);
-		return id;
-	}
+		return null;
+	 }
 
 	/**
     * f0 -> <IDENTIFIER>
     */
-	public String visit(Identifier n, String argu) {
+	public Object visit(Identifier n, Object argu) {
 		return n.f0.toString();
 	}
-
 
  	/**
     * f0 -> ArrayType()
@@ -92,47 +201,47 @@ public class IdentifierVisitor extends GJDepthFirst<String, String>{
     *       | IntegerType()
     *       | Identifier()
     */
-	public String visit(Type n, String argu) {
-		return n.f0.accept(this, argu);
+	public Object visit(Type n, Object argu) {
+		return (String) n.f0.accept(this, argu);
 	}
   
-	 /**
-	  * f0 -> BooleanArrayType()
-	  *       | IntegerArrayType()
-	  */
-	public String visit(ArrayType n, String argu) {
-		return n.f0.accept(this, argu);
+	/**
+	* f0 -> BooleanArrayType()
+	*       | IntegerArrayType()
+	*/
+	public Object visit(ArrayType n, Object argu) {
+		return (String) n.f0.accept(this, argu);
 	}
   
-	 /**
-	  * f0 -> "boolean"
-	  * f1 -> "["
-	  * f2 -> "]"
-	  */
-	public String visit(BooleanArrayType n, String argu) {
+	/**
+	 * f0 -> "boolean"
+	* f1 -> "["
+	* f2 -> "]"
+	*/
+	public Object visit(BooleanArrayType n, Object argu) {
 		return "boolean[]";
 	}
   
-	 /**
-	  * f0 -> "int"
-	  * f1 -> "["
-	  * f2 -> "]"
-	  */
-	public String visit(IntegerArrayType n, String argu) {
+	/**
+	 * f0 -> "int"
+	* f1 -> "["
+	* f2 -> "]"
+	*/
+	public Object visit(IntegerArrayType n, Object argu) {
 		return "int[]";
 	}
   
-	 /**
-	  * f0 -> "boolean"
-	  */
-	public String visit(BooleanType n, String argu) {
+	/**
+	 * f0 -> "boolean"
+	*/
+	public Object visit(BooleanType n, Object argu) {
 		return "boolean";
 	}
   
-	 /**
-	  * f0 -> "int"
-	  */
-	public String visit(IntegerType n, String argu) {
+	/**
+	 * f0 -> "int"
+	*/
+	public Object visit(IntegerType n, Object argu) {
 		return "int";
 	}
 

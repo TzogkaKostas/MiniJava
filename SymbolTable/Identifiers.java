@@ -12,6 +12,11 @@ public class Identifiers {
 		this.identifiers = identifiers;
 	}
 
+	public Identifiers(String id, String type) {
+		this.identifiers = new HashMap<>();
+		identifiers.put(id, type);
+	}
+
 	public void insert(String identifier, String type) {
 		identifiers.put(identifier, type);
 	}
@@ -21,8 +26,12 @@ public class Identifiers {
 	}
 
 	public void print() {
+		if (identifiers.isEmpty())
+			return;
+		System.out.print("[");
 		for (HashMap.Entry<String, String> entry : identifiers.entrySet()) {
-			System.out.println("key: " + entry.getKey() + "; value: " + entry.getValue());
+			System.out.print("(" + entry.getKey() + ", " + entry.getValue() + "), ");
 		}
+		System.out.println("]");
 	}
 }

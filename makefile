@@ -1,5 +1,4 @@
-all: main SymbolTable ClassInfo FunctionInfo Identifiers \
-	# minijava minijava-jtb
+all: main SymbolTable ClassInfo FunctionInfo Identifiers
 
 minijava: minijava.jj
 	java -jar ../jtb-javacc-2016/jtb132di.jar minijava.jj

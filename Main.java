@@ -1,21 +1,27 @@
 import syntaxtree.*;
 import java.io.*;
 
+import SymbolTable.SymbolTable;
+
 class Main {
     public static void main (String [] args){
-		if(args.length != 1){
-			System.err.println("Usage: java Driver <inputFile>");
-			System.exit(1);
-		}
+		// if(args.length != 1){
+		// 	System.err.println("Usage: java Driver <inputFile>");
+		// 	System.exit(1);
+		// }
 		FileInputStream fis = null;
 		try{
-			fis = new FileInputStream(args[0]);
+			// args[0] = "test.txt";
+			fis = new FileInputStream("test.txt");
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			System.err.println("Program parsed successfully.");
 			IdentifierVisitor idVisitor = new IdentifierVisitor();
 			Goal root = parser.Goal();
-			System.out.println(root.accept(idVisitor, null));
-			idVisitor.print();
+			root.accept(idVisitor, null);
+			SymbolTable symbolTable = idVisitor.getSymbolTable();
+			symbolTable.print();
+
+			
 		}
 		catch(ParseException ex){
 			System.out.println(ex.getMessage());

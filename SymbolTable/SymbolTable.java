@@ -32,7 +32,9 @@ public class SymbolTable {
 
 	public void print() {
 		for (String name: classes.keySet()){
+			System.out.print("class " + name);
 			classes.get(name).print();
+			System.out.println("");
 		}
 	}
 
