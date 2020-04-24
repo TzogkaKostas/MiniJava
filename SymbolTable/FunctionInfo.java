@@ -1,35 +1,26 @@
 package SymbolTable;
+import java.util.*;
 
 public class FunctionInfo {
 	String returnType;
-	Identifiers parameters;
-	Identifiers variables;
+	Variables allVariables;
+	Variables parameters;
 
 	public FunctionInfo(String returnType) {
 		this.returnType = returnType;
 	}
 
-	public FunctionInfo(String returnType, Identifiers parameters,
-		Identifiers variables) {
+	public FunctionInfo(String returnType, Variables allVariables) {
 		this.returnType = returnType;
-		this.parameters = parameters;
-		this.variables = variables;
-	}
-
-	public void insertParameter(String name, String type) {
-		parameters.insert(name, type);
+		this.allVariables = allVariables;
 	}
 
 	public void insertVariable(String name, String type) {
-		variables.insert(name, type);
+		allVariables.insert(name, type);
 	}
 
-	public String getParameter(String name) {
-		return parameters.lookup(name);
-	}
-
-	public String getinsertVariable(String name) {
-		return variables.lookup(name);
+	public String getVariable(String name) {
+		return allVariables.lookup(name);
 	}
 
 	public void setExtendedName(String returnType) {
@@ -44,36 +35,40 @@ public class FunctionInfo {
 		this.returnType = returnType;
 	}
 
-	public Identifiers getParameters() {
-		return this.parameters;
+	public Variables getAllVariables() {
+		return this.allVariables;
 	}
 
-	public void setParameters(Identifiers parameters) {
-		this.parameters = parameters;
+	public void setAllVariables(Variables allVariables) {
+		this.allVariables = allVariables;
 	}
 
-	public Identifiers getVariables() {
-		return this.variables;
+	public void setParameters(Variables parameters) {
+		this.parameters = new Variables(
+			new HashMap<String, String>(parameters.getVariables()));
 	}
 
-	public void setVariables(Identifiers variables) {
-		this.variables = variables;
+	public boolean isDeclared(String identifier) {
+		if (allVariables.exists(identifier)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public String getType(String identifier) {
+		return allVariables.lookup(identifier);
 	}
 
 	public void print() {
 		System.out.println(" returns " + returnType);
-		System.out.print("Params: ");
-		parameters.print();
 		System.out.print("Var Declaration: ");
-		variables.print();
+		allVariables.print();
 	}
 
-	public void printParameters() {
-		parameters.print();
-	}
-
-	public void printVariables() {
-		variables.print();
+	public void printallVariables() {
+		allVariables.print();
 	}
 
 }

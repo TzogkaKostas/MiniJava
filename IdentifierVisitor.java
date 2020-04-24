@@ -1,9 +1,13 @@
 import syntaxtree.*;
 import visitor.GJDepthFirst;
+
+import java.util.HashMap;
+
 import SymbolTable.*;
 
 public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	SymbolTable symbolTable = new SymbolTable();
+	OffsetTable offsetTable = new OffsetTable();
 
 	public SymbolTable getSymbolTable() {
 		return this.symbolTable;
@@ -15,9 +19,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	* f2 -> <EOF>
 	*/
 	public Object visit(Goal n, Object argu) {
-		ClassInfo mainClassInfo = new ClassInfo();
-		String mainClassName = (String) n.f0.accept(this, mainClassInfo);
-		symbolTable.insertClass(mainClassName, mainClassInfo);
+		n.f0.accept(this, null);
 		n.f1.accept(this, null);
 		return null;
 	}
@@ -44,17 +46,18 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(MainClass n, Object argu) {
 		String className = (String) n.f1.accept(this, null);
-		String argsName = (String) n.f11.accept(this, null);
 		
-		Identifiers identifiers = new Identifiers();
-		n.f14.accept(this, identifiers);
-
-		ClassInfo classInfo = new ClassInfo(className, argsName, identifiers);
+		String argsName = (String) n.f11.accept(this, null);
+		Variables variables = new Variables();
+		variables.insert(argsName, "String[]");
+		n.f14.accept(this, variables);
+		
+		ClassInfo classInfo = new ClassInfo("main", new FunctionInfo("void", variables));
 		symbolTable.insertClass(className, classInfo);
-		return null;
-	 }
+		return className;
+	}
 
-	/**
+	/** m
 	* f0 -> "class"
 	* f1 -> Identifier()
 	* f2 -> "{"
@@ -65,16 +68,18 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(ClassDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 
-		Identifiers variables = new Identifiers();
+		Variables variables = new Variables();
 		n.f3.accept(this, variables);
 
-		ClassInfo classInfo = new ClassInfo("", variables);
-
+		ClassInfo classInfo = new ClassInfo(variables);
 		n.f4.accept(this, classInfo);
 
+		if (symbolTable.classExists(className) && className != "main"){
+			throw new Error("Class " + className + " already exists");
+		}
 		symbolTable.insertClass(className, classInfo);
 		return null;
-	 }
+	}
   
 	/**
 	 * f0 -> "class"
@@ -89,13 +94,21 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(ClassExtendsDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 
-		Identifiers variables = new Identifiers();
+		Variables variables = new Variables();
 		n.f5.accept(this, variables);
 
-		ClassInfo classInfo = new ClassInfo("extends", variables);
+		String extendsName = (String) n.f3.accept(this, argu);
+		ClassInfo extendsClass = symbolTable.getClassInfo(extendsName);
+		if (extendsClass == null) {
+			throw new Error("Extends Class " + extendsClass + " is not declared");
+		}
+		ClassInfo classInfo = new ClassInfo(extendsName, extendsClass, variables);
 
 		n.f6.accept(this, classInfo);
 
+		if (symbolTable.classExists(className) && className != "main"){
+			throw new Error("Class " + className + " already exists");
+		}
 		symbolTable.insertClass(className, classInfo);
 		return null;
 	}
@@ -122,14 +135,15 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 
 		FunctionInfo functionInfo = new FunctionInfo(returnType);
 
-		Identifiers parameters = new Identifiers();
-		n.f4.accept(this, argu);
-		functionInfo.setParameters(parameters);
+		Variables allVariables = new Variables();
+		n.f4.accept(this, allVariables);
+		functionInfo.setParameters(allVariables);
+		n.f7.accept(this, allVariables);
+		functionInfo.setAllVariables(allVariables);
 
-		Identifiers variables = new Identifiers();
-		n.f7.accept(this, variables);
-		functionInfo.setVariables(variables);
-
+		if (classInfo.functionExists(functionName)) {
+			throw new Error("Method " + functionName + " already exists");
+		}
 		classInfo.insertFunction(functionName, functionInfo);
 		return null;
 	}
@@ -139,9 +153,14 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
     * f1 -> FormalParameterTail()
     */
 	public Object visit(FormalParameterList n, Object argu) {
-		Identifiers identifiers = (Identifiers) argu;
+		Variables variables = (Variables) argu;
 		String[] strArray = (String[]) n.f0.accept(this, null);
-		identifiers.insert(strArray[0], strArray[1]);
+
+		if (variables.exists(strArray[1])) {
+			throw new Error("Variable " + strArray[1] + " already exists");
+		}
+		variables.insert(strArray[1], strArray[0]);
+
 		n.f1.accept(this, argu);
 		return null;
 	}
@@ -158,20 +177,17 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	}
   
 	/**
-	* f0 -> ( FormalParameterTerm() )*
-	*/
-	// public Object visit(FormalParameterTail n, Object argu) {
-		// return n.f0.accept(this, argu);
-	// }
-  
-	/**
 	* f0 -> ","
 	* f1 -> FormalParameter()
 	*/
 	public Object visit(FormalParameterTerm n, Object argu) {
-		Identifiers identifiers = (Identifiers) argu;
+		Variables variables = (Variables) argu;
 		String[] strArray = (String[]) n.f0.accept(this, null);
-		identifiers.insert(strArray[0], strArray[1]);
+
+		if (variables.exists(strArray[1])) {
+			throw new Error("Variable " + strArray[1] + " already exists");
+		}
+		variables.insert(strArray[0], strArray[1]);
 		return null;
 	}
 
@@ -181,10 +197,14 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	* f2 -> ";"
 	*/
 	public Object visit(VarDeclaration n, Object argu) {
-		Identifiers identifiers = (Identifiers) argu;
+		Variables variables = (Variables) argu;
 		String type = (String) n.f0.accept(this, null);
 		String id = (String) n.f1.accept(this, null);
-		identifiers.insert(id, type);
+
+		if (variables.exists(id)) {
+			throw new Error("Variable " + id + " already exists");
+		}
+		variables.insert(id, type);
 		return null;
 	 }
 

@@ -2,33 +2,27 @@ package SymbolTable;
 import java.util.HashMap;
 
 public class ClassInfo {
-	String extendedName;
-	Identifiers variables;
+	String extendsName;
+	ClassInfo extendsInfo;
+	Variables variables;
 	HashMap<String, FunctionInfo> functions;
 
-	public ClassInfo(String extendedName, Identifiers variables,
-		HashMap<String,FunctionInfo> functions) {
-		this.extendedName = extendedName;
-		this.variables = variables;
-		this.functions = functions;
-	}
-
-	public ClassInfo(String extendedName, Identifiers variables) {
-		this.extendedName = extendedName;
+	public ClassInfo(Variables variables) {
+		this.extendsName = "";
 		this.variables = variables;
 		this.functions = new HashMap<>();
 	}
 
-	public ClassInfo() {
-		variables = new Identifiers();
-		functions = new HashMap<>();
+	public ClassInfo(String extendsName, ClassInfo extendsInfo, Variables variables) {
+		this.extendsName = extendsName;
+		this.extendsInfo = extendsInfo;
+		this.variables = variables;
+		this.functions = new HashMap<>();
 	}
 
-	public ClassInfo(String className, String argsName, Identifiers variables) {
-		this.variables = new Identifiers();
+	public ClassInfo(String functionName, FunctionInfo functionInfo) {
 		this.functions = new HashMap<>();
-		this.functions.put("main", new FunctionInfo("void",
-			new Identifiers("String[]", argsName), variables));
+		this.functions.put(functionName, functionInfo);
 	}
 
 	public void insertVariable(String identifier, String type) {
@@ -39,19 +33,19 @@ public class ClassInfo {
 		functions.put(name, function);
 	}
 
-	public void setExtendedName(String extendedName) {
-		this.extendedName = extendedName;
+	public void setExtendedName(String extendsName) {
+		this.extendsName = extendsName;
 	}
 
 	public String getExtendedName() {
-		return this.extendedName;
+		return this.extendsName;
 	}
 
-	public Identifiers getVariables() {
+	public Variables getVariables() {
 		return this.variables;
 	}
 
-	public void setVariables(Identifiers variables) {
+	public void setVariables(Variables variables) {
 		this.variables = variables;
 	}
 
@@ -63,9 +57,43 @@ public class ClassInfo {
 		this.functions = functions;
 	}
 
+	public FunctionInfo getFunctionInfo(String functionName) {
+		return functions.get(functionName);
+	}
+
+	public boolean isVarDeclared(String variable) {
+		if (variables.exists(variable)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public boolean isMethodDeclared(String methodName) {
+		if (functions.get(methodName) != null) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	public String getVarType(String identifier) {
+		return variables.lookup(identifier);
+	}
+
+	public boolean functionExists(String functionName) {
+		if (functions.get(functionName) != null)
+			return true;
+		else
+			return false;
+	}
+
 	public void print() {
-		System.out.println(" extends " + (extendedName != "" ? extendedName : " "));
-		variables.print();
+		System.out.println(" extends " + (extendsName != "" ? extendsName : " "));
+		if (variables != null)
+			variables.print();	
 		if (!functions.isEmpty()) {
 			for (String name: functions.keySet()){
 				System.out.print("Function " + name);

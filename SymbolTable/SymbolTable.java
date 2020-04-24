@@ -22,12 +22,23 @@ public class SymbolTable {
 		return mainClassName;
 	}
 
+	public ClassInfo getClassInfo(String className) {
+		return classes.get(className);
+	}
+
 	public void setMainClassName(String mainClassName) {
 		this.mainClassName = mainClassName;
 	}
 
 	public void printClassesNames() {
 		System.out.println(classes.keySet());
+	}
+
+	public boolean classExists(String className) {
+		if (classes.get(className) != null)
+			return true;
+		else
+			return false;
 	}
 
 	public void print() {

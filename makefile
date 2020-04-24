@@ -1,4 +1,4 @@
-all: main SymbolTable ClassInfo FunctionInfo Identifiers
+all: main SymbolTable ClassInfo FunctionInfo Variables
 
 minijava: minijava.jj
 	java -jar ../jtb-javacc-2016/jtb132di.jar minijava.jj
@@ -18,8 +18,8 @@ ClassInfo: SymbolTable/ClassInfo.java
 FunctionInfo: SymbolTable/FunctionInfo.java
 	javac SymbolTable/FunctionInfo.java
 
-Identifiers: SymbolTable/Identifiers.java
-	javac SymbolTable/Identifiers.java
+Variables: SymbolTable/Variables.java
+	javac SymbolTable/Variables.java
 
 clean:
 	rm -f *.class *~ SymbolTable/*.class
