@@ -26,7 +26,7 @@ public class StatementInfo {
 	}
 
 	public boolean isVarDeclared(String identifier) {
-		MethodInfo methodInfo = classInfo.getMethodInfo(curMethodName);
+		MethodInfo methodInfo = classInfo.getMethod(curMethodName);
 		if (classInfo.isVarDeclared(identifier) && methodInfo.isDeclared(identifier)) {
 			return true;
 		}
@@ -40,7 +40,7 @@ public class StatementInfo {
 	}
 
 	public String getType(String identifier) {
-		MethodInfo methodInfo = classInfo.getMethodInfo(curMethodName);
+		MethodInfo methodInfo = classInfo.getMethod(curMethodName);
 		String type = methodInfo.getType(identifier);
 		if (type != null) {
 			return type;

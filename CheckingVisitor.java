@@ -5,7 +5,6 @@ import java.util.*;
 
 public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	SymbolTable symbolTable;
-	// OffsetTable offsetTable = new OffsetTable();
 	
 	CheckingVisitor(SymbolTable symbolTable) {
 		this.symbolTable = symbolTable;
@@ -228,6 +227,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(ExpressionList n, Object argu) {
 		Object array[] = (Object[]) argu;
 		StatementInfo statementInfo = (StatementInfo) array[0];
+
 		ArrayList<ExpressionInfo> args = (ArrayList<ExpressionInfo>) array[1];
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, statementInfo);
@@ -363,37 +363,37 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	// 	return null;
 	// }
 
-   	// /**
-	// * f0 -> "class"
-	// * f1 -> Identifier()
-	// * f2 -> "{"
-	// * f3 -> "public"
-	// * f4 -> "static"
-	// * f5 -> "void"
-	// * f6 -> "main"
-	// * f7 -> "("
-	// * f8 -> "String"
-	// * f9 -> "["
-	// * f10 -> "]"
-	// * f11 -> Identifier()
-	// * f12 -> ")"
-	// * f13 -> "{"
-	// * f14 -> ( VarDeclaration() )*
-	// * f15 -> ( Statement() )*
-	// * f16 -> "}"
-	// * f17 -> "}"
-	// */
-	// public Object visit(MainClass n, Object argu) {
-	// 	String className = (String) n.f1.accept(this, null);
-	// 	String argsName = (String) n.f11.accept(this, null);
+   	/**
+	* f0 -> "class"
+	* f1 -> Identifier()
+	* f2 -> "{"
+	* f3 -> "public"
+	* f4 -> "static"
+	* f5 -> "void"
+	* f6 -> "main"
+	* f7 -> "("
+	* f8 -> "String"
+	* f9 -> "["
+	* f10 -> "]"
+	* f11 -> Identifier()
+	* f12 -> ")"
+	* f13 -> "{"
+	* f14 -> ( VarDeclaration() )*
+	* f15 -> ( Statement() )*
+	* f16 -> "}"
+	* f17 -> "}"
+	*/
+	public Object visit(MainClass n, Object argu) {
+		String className = (String) n.f1.accept(this, argu);
+		ClassInfo classInfo = symbolTable.getClassInfo(className);
 		
-	// 	Identifiers identifiers = new Identifiers();
-	// 	n.f14.accept(this, identifiers);
-
-	// 	ClassInfo classInfo = new ClassInfo(className, argsName, identifiers);
-	// 	symbolTable.insertClass(className, classInfo);
-	// 	return null;
-	// }
+		System.out.println("111");
+		System.out.println(className);
+		// System.out.println(classInfo);
+		n.f15.accept(this, new StatementInfo(classInfo, "main"));
+		System.out.println("222");
+		return null;
+	}
 
 	/**
 	* f0 -> "class"
@@ -409,7 +409,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 
 		n.f4.accept(this, classInfo);
 		return null;
-	 }
+	}
   
 	/**
 	 * f0 -> "class"
@@ -510,7 +510,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
     * f0 -> <IDENTIFIER>
     */
 	public Object visit(Identifier n, Object argu) {
-		return n.f0.accept(this, argu).toString();
+		return n.f0.toString();
 	}
 
  	// /**

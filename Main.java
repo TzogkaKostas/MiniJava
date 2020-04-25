@@ -1,7 +1,7 @@
 import syntaxtree.*;
 import java.io.*;
 
-import SymbolTable.SymbolTable;
+import SymbolTable.*;
 
 class Main {
     public static void main (String [] args){
@@ -12,14 +12,19 @@ class Main {
 		FileInputStream fis = null;
 		try{
 			fis = new FileInputStream(args[0]);
-			// fis = new FileInputStream("test.java");
 			MiniJavaParser parser = new MiniJavaParser(fis);
-			System.err.println("Program parsed successfully.\n");
-			IdentifierVisitor idVisitor = new IdentifierVisitor();
 			Goal root = parser.Goal();
+			System.err.println("Program parsed successfully.\n");
+ 
+			IdentifierVisitor idVisitor = new IdentifierVisitor();
 			root.accept(idVisitor, null);
+
 			SymbolTable symbolTable = idVisitor.getSymbolTable();
-			symbolTable.print();
+			// symbolTable.print();
+
+			CheckingVisitor checkingVisitor = new CheckingVisitor(symbolTable);
+			root.accept(checkingVisitor, null);
+			
 		}
 		catch(ParseException ex){
 			System.out.println(ex.getMessage());
