@@ -40,12 +40,17 @@ public class MethodInfo {
 		return this.allVariables;
 	}
 
+	public Variables getParameters() {
+		return this.parameters;
+	}
+
 	public void setAllVariables(Variables allVariables) {
 		this.allVariables = allVariables;
 	}
 
 	public void setParameters(Variables parameters) {
-		this.parameters = new Variables(new LinkedHashMap<String, String>(parameters.getVariables()));
+		this.parameters = new Variables(
+			new LinkedHashMap<String, String>(parameters.getVariables()));
 	}
 
 	public boolean isDeclared(String identifier) {
@@ -67,7 +72,7 @@ public class MethodInfo {
 		}
 		int i = 0;
 		for (Entry<String, String> entry : params.entrySet()) {
-			if (args.get(i).getType() != entry.getValue() ) {
+			if (!args.get(i).getType().equals(entry.getValue()) ) {
 				return false;
 			}
 			i++;
@@ -77,8 +82,10 @@ public class MethodInfo {
 
 	public void print() {
 		System.out.println(" returns " + returnType);
-		System.out.print("Var Declaration: ");
-		allVariables.print();
+		if (allVariables.getSize() != 0) {
+			System.out.print("Var Declaration: ");
+			allVariables.print();	
+		}
 	}
 
 	public void printallVariables() {

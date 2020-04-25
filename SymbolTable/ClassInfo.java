@@ -1,7 +1,10 @@
 package SymbolTable;
 import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class ClassInfo {
+	String name;
 	String extendsName;
 	ClassInfo extendsInfo;
 	Variables variables;
@@ -21,6 +24,8 @@ public class ClassInfo {
 	}
 
 	public ClassInfo(String methodName, MethodInfo methodInfo) {
+		this.extendsName = "";
+		this.variables = new Variables();
 		this.methods = new LinkedHashMap<>();
 		this.methods.put(methodName, methodInfo);
 	}
@@ -31,6 +36,14 @@ public class ClassInfo {
 
 	public void insertMethod(String name, MethodInfo method) {
 		methods.put(name, method);
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public void setExtendedName(String extendsName) {
@@ -70,8 +83,8 @@ public class ClassInfo {
 		}
 	}
 
-	public boolean isMethodDeclared(String Name) {
-		if (methods.get(Name) != null) {
+	public boolean isMethodDeclared(String methodName) {
+		if (methods.get(methodName) != null) {
 			return true;
 		}
 		else {
@@ -90,10 +103,28 @@ public class ClassInfo {
 			return false;
 	}
 
+	public boolean isOverload(String methodName, MethodInfo methodInfo) {
+		MethodInfo otherMethodInfo = methods.get(methodName);
+		if (otherMethodInfo == null) {
+			return false;
+		}
+		return !otherMethodInfo.validArguments(getAsList(methodInfo.getParameters()));
+	}
+
+	public ArrayList<ExpressionInfo> getAsList(Variables vars) {
+		ArrayList<ExpressionInfo> args = new ArrayList<ExpressionInfo>();
+		for (Entry<String, String> entry : vars.getEntries()) {
+			args.add(new ExpressionInfo("", entry.getValue(), ""));
+		}
+		return args;
+	}
+
 	public void print() {
-		System.out.println(" extends " + (extendsName != "" ? extendsName : " "));
-		if (variables != null)
+		System.out.println((!extendsName.equals("") ? " extends " + extendsName : ""));
+		if (variables != null && variables.getSize() != 0) {
+			System.out.print("fields: ");
 			variables.print();	
+		}
 		if (!methods.isEmpty()) {
 			for (String name: methods.keySet()){
 				System.out.print("Method " + name);

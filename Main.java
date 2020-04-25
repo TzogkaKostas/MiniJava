@@ -1,6 +1,5 @@
 import syntaxtree.*;
 import java.io.*;
-
 import SymbolTable.*;
 
 class Main {
@@ -24,7 +23,6 @@ class Main {
 
 			CheckingVisitor checkingVisitor = new CheckingVisitor(symbolTable);
 			root.accept(checkingVisitor, null);
-			
 		}
 		catch(ParseException ex){
 			System.out.println(ex.getMessage());

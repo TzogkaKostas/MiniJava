@@ -45,6 +45,10 @@ public class Variables {
 		return variables.isEmpty();
 	}
 
+	public int getSize() {
+		return variables.size();
+	}
+
 	public void print() {
 		if (variables.isEmpty())
 			return;

@@ -1,4 +1,5 @@
 package SymbolTable;
+import java.util.*;
 
 public class StatementInfo {
 	ClassInfo classInfo;
@@ -17,6 +18,10 @@ public class StatementInfo {
 		this.classInfo = classInfo;
 	}
 
+	public String getMainName() {
+		return classInfo.getName();
+	}
+
 	public String getCurMethodName() {
 		return this.curMethodName;
 	}
@@ -27,7 +32,7 @@ public class StatementInfo {
 
 	public boolean isVarDeclared(String identifier) {
 		MethodInfo methodInfo = classInfo.getMethod(curMethodName);
-		if (classInfo.isVarDeclared(identifier) && methodInfo.isDeclared(identifier)) {
+		if (classInfo.isVarDeclared(identifier) || methodInfo.isDeclared(identifier)) {
 			return true;
 		}
 		else {
@@ -39,6 +44,10 @@ public class StatementInfo {
 		return classInfo.isMethodDeclared(methodName);
 	}
 
+	public boolean validMethodArgs(String methodName, ArrayList<ExpressionInfo> args) {
+		return classInfo.getMethod(methodName).validArguments(args);
+	}
+
 	public String getType(String identifier) {
 		MethodInfo methodInfo = classInfo.getMethod(curMethodName);
 		String type = methodInfo.getType(identifier);
@@ -48,5 +57,14 @@ public class StatementInfo {
 		else {
 			return classInfo.getVarType(identifier);
 		}
+	}
+
+	public String getMethodReturnedType(String methodName) {
+		return classInfo.getMethod(methodName).getReturnType();
+	}
+
+	public void print() {
+		classInfo.print();
+		System.out.println(curMethodName);
 	}
 }

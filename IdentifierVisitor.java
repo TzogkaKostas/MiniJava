@@ -71,7 +71,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		ClassInfo classInfo = new ClassInfo(variables);
 		n.f4.accept(this, classInfo);
 
-		if (symbolTable.classExists(className) && className != "main"){
+		if (symbolTable.classExists(className) && !className.equals("main")) {
 			throw new Error("Class " + className + " already exists");
 		}
 		symbolTable.insertClass(className, classInfo);
@@ -103,7 +103,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 
 		n.f6.accept(this, classInfo);
 
-		if (symbolTable.classExists(className) && className != "main"){
+		if (symbolTable.classExists(className) && !className.equals("main")){
 			throw new Error("Class " + className + " already exists");
 		}
 		symbolTable.insertClass(className, classInfo);
@@ -138,7 +138,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		n.f7.accept(this, allVariables);
 		methodInfo.setAllVariables(allVariables);
 
-		if (classInfo.methodExists(methodName)) {
+		if (classInfo.methodExists(methodName) && !classInfo.isOverload(methodName, methodInfo)) {
 			throw new Error("Method " + methodName + " already exists");
 		}
 		classInfo.insertMethod(methodName, methodInfo);
@@ -151,7 +151,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
     */
 	public Object visit(FormalParameterList n, Object argu) {
 		Variables variables = (Variables) argu;
-		String[] strArray = (String[]) n.f0.accept(this, null);
+		String[] strArray = (String[]) n.f0.accept(this, argu);
 
 		if (variables.exists(strArray[1])) {
 			throw new Error("Variable " + strArray[1] + " already exists");
@@ -168,8 +168,8 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(FormalParameter n, Object argu) {
 		String strArray[] = new String[2];
-		strArray[0] = (String) n.f0.accept(this, null);
-		strArray[1] = (String) n.f1.accept(this, null);
+		strArray[0] = (String) n.f0.accept(this, argu);
+		strArray[1] = (String) n.f1.accept(this, argu);
 		return strArray;
 	}
   
@@ -179,12 +179,12 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(FormalParameterTerm n, Object argu) {
 		Variables variables = (Variables) argu;
-		String[] strArray = (String[]) n.f0.accept(this, null);
+		String[] strArray = (String[]) n.f1.accept(this, argu);
 
 		if (variables.exists(strArray[1])) {
 			throw new Error("Variable " + strArray[1] + " already exists");
 		}
-		variables.insert(strArray[0], strArray[1]);
+		variables.insert(strArray[1], strArray[0]);
 		return null;
 	}
 

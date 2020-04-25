@@ -47,7 +47,7 @@ public class SymbolTable {
 		if (classInfo == null) {
 			return false;
 		}
-		return classInfo.getExtendedName() == base; 
+		return classInfo.getExtendedName().equals(base); 
 	}
 
 	public boolean classHasMethod(String className, String methodName) {
