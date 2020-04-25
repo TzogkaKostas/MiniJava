@@ -1,16 +1,17 @@
 package SymbolTable;
 import java.util.*;
+import java.util.Map.Entry;
 
-public class FunctionInfo {
+public class MethodInfo {
 	String returnType;
 	Variables allVariables;
 	Variables parameters;
 
-	public FunctionInfo(String returnType) {
+	public MethodInfo(String returnType) {
 		this.returnType = returnType;
 	}
 
-	public FunctionInfo(String returnType, Variables allVariables) {
+	public MethodInfo(String returnType, Variables allVariables) {
 		this.returnType = returnType;
 		this.allVariables = allVariables;
 	}
@@ -44,21 +45,34 @@ public class FunctionInfo {
 	}
 
 	public void setParameters(Variables parameters) {
-		this.parameters = new Variables(
-			new HashMap<String, String>(parameters.getVariables()));
+		this.parameters = new Variables(new LinkedHashMap<String, String>(parameters.getVariables()));
 	}
 
 	public boolean isDeclared(String identifier) {
 		if (allVariables.exists(identifier)) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
 
 	public String getType(String identifier) {
 		return allVariables.lookup(identifier);
+	}
+
+	public boolean validArguments(ArrayList<ExpressionInfo> args) {
+		LinkedHashMap<String, String> params = parameters.getVariables();
+		if (args.size() != params.size()) {
+			return false;
+		}
+		int i = 0;
+		for (Entry<String, String> entry : params.entrySet()) {
+			if (args.get(i).getType() != entry.getValue() ) {
+				return false;
+			}
+			i++;
+		}
+		return true;
 	}
 
 	public void print() {

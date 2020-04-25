@@ -1,4 +1,4 @@
-all: main SymbolTable ClassInfo FunctionInfo Variables
+all: main SymbolTable ClassInfo MethodFunction Variables
 
 minijava: minijava.jj
 	java -jar ../jtb-javacc-2016/jtb132di.jar minijava.jj
@@ -15,8 +15,8 @@ SymbolTable: SymbolTable/SymbolTable.java
 ClassInfo: SymbolTable/ClassInfo.java
 	javac SymbolTable/ClassInfo.java
 
-FunctionInfo: SymbolTable/FunctionInfo.java
-	javac SymbolTable/FunctionInfo.java
+MethodFunction: SymbolTable/MethodFunction.java
+	javac SymbolTable/MethodFunction.java
 
 Variables: SymbolTable/Variables.java
 	javac SymbolTable/Variables.java

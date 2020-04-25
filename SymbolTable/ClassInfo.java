@@ -1,36 +1,36 @@
 package SymbolTable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class ClassInfo {
 	String extendsName;
 	ClassInfo extendsInfo;
 	Variables variables;
-	HashMap<String, FunctionInfo> functions;
+	LinkedHashMap<String, MethodInfo> methods;
 
 	public ClassInfo(Variables variables) {
 		this.extendsName = "";
 		this.variables = variables;
-		this.functions = new HashMap<>();
+		this.methods = new LinkedHashMap<>();
 	}
 
 	public ClassInfo(String extendsName, ClassInfo extendsInfo, Variables variables) {
 		this.extendsName = extendsName;
 		this.extendsInfo = extendsInfo;
 		this.variables = variables;
-		this.functions = new HashMap<>();
+		this.methods = new LinkedHashMap<>();
 	}
 
-	public ClassInfo(String functionName, FunctionInfo functionInfo) {
-		this.functions = new HashMap<>();
-		this.functions.put(functionName, functionInfo);
+	public ClassInfo(String methodName, MethodInfo methodInfo) {
+		this.methods = new LinkedHashMap<>();
+		this.methods.put(methodName, methodInfo);
 	}
 
 	public void insertVariable(String identifier, String type) {
 		variables.insert(identifier, type);		
 	}
 
-	public void insertFunction(String name, FunctionInfo function) {
-		functions.put(name, function);
+	public void insertMethod(String name, MethodInfo method) {
+		methods.put(name, method);
 	}
 
 	public void setExtendedName(String extendsName) {
@@ -49,16 +49,16 @@ public class ClassInfo {
 		this.variables = variables;
 	}
 
-	public HashMap<String,FunctionInfo> getFunctions() {
-		return this.functions;
+	public LinkedHashMap<String,MethodInfo> getMethods() {
+		return this.methods;
 	}
 
-	public void setFunctions(HashMap<String,FunctionInfo> functions) {
-		this.functions = functions;
+	public void setMethods(LinkedHashMap<String,MethodInfo> methods) {
+		this.methods = methods;
 	}
 
-	public FunctionInfo getFunctionInfo(String functionName) {
-		return functions.get(functionName);
+	public MethodInfo getMethod(String methodName) {
+		return methods.get(methodName);
 	}
 
 	public boolean isVarDeclared(String variable) {
@@ -70,8 +70,8 @@ public class ClassInfo {
 		}
 	}
 
-	public boolean isMethodDeclared(String methodName) {
-		if (functions.get(methodName) != null) {
+	public boolean isMethodDeclared(String Name) {
+		if (methods.get(Name) != null) {
 			return true;
 		}
 		else {
@@ -83,8 +83,8 @@ public class ClassInfo {
 		return variables.lookup(identifier);
 	}
 
-	public boolean functionExists(String functionName) {
-		if (functions.get(functionName) != null)
+	public boolean methodExists(String methodName) {
+		if (methods.get(methodName) != null)
 			return true;
 		else
 			return false;
@@ -94,22 +94,22 @@ public class ClassInfo {
 		System.out.println(" extends " + (extendsName != "" ? extendsName : " "));
 		if (variables != null)
 			variables.print();	
-		if (!functions.isEmpty()) {
-			for (String name: functions.keySet()){
-				System.out.print("Function " + name);
-				functions.get(name).print();
+		if (!methods.isEmpty()) {
+			for (String name: methods.keySet()){
+				System.out.print("Method " + name);
+				methods.get(name).print();
 			}
 		}
 	}
 
-	public void printFunctions() {
-		for (String name: functions.keySet()){
-			functions.get(name).print();
+	public void printMethods() {
+		for (String name: methods.keySet()){
+			methods.get(name).print();
 		}
 	}
 
-	public void printFunctionsNames() {
-		System.out.println(functions.keySet());
+	public void printMethodsNames() {
+		System.out.println(methods.keySet());
 	}
 	
 }

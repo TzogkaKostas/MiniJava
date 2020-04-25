@@ -3,18 +3,18 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class Variables {
-	HashMap<String, String> variables;
+	LinkedHashMap<String, String> variables;
 
 	public Variables() {
-		variables = new HashMap<>();
+		variables = new LinkedHashMap<>();
 	}
 
-	public Variables(HashMap<String, String> variables) {
+	public Variables(LinkedHashMap<String, String> variables) {
 		this.variables = variables;
 	}
 
 	public Variables(String id, String type) {
-		this.variables = new HashMap<>();
+		this.variables = new LinkedHashMap<>();
 		variables.put(id, type);
 	}
 
@@ -26,7 +26,7 @@ public class Variables {
 		return variables.entrySet();
 	}
 
-	public HashMap<String, String> getVariables() {
+	public LinkedHashMap<String, String> getVariables() {
 		return variables;
 	}
 
@@ -49,7 +49,7 @@ public class Variables {
 		if (variables.isEmpty())
 			return;
 		System.out.print("[");
-		for (HashMap.Entry<String, String> entry : variables.entrySet()) {
+		for (Entry<String, String> entry : variables.entrySet()) {
 			System.out.print("(" + entry.getKey() + ", " + entry.getValue() + "), ");
 		}
 		System.out.println("]");

@@ -1,6 +1,6 @@
+package SymbolTable;
 import java.util.*;
-
-import SymbolTable.*;
+import java.util.Map.Entry;
 
 class Item {
     String className;
@@ -26,10 +26,10 @@ class Item {
     }
 }
 
-class OffsetTable {
+public class OffsetTable {
     ArrayList<Item> items;
 
-    OffsetTable() {
+    public OffsetTable() {
         this.items = new ArrayList<>();
     }
 
@@ -43,7 +43,7 @@ class OffsetTable {
 
     void insertClass(String className, ClassInfo classInfo, Integer varOffset,
             Integer methodOffset) {
-		for (HashMap.Entry<String, String> entry : classInfo.getVariables().getEntries() ) {
+		for (Entry<String, String> entry : classInfo.getVariables().getEntries() ) {
 			System.out.print("(" + entry.getKey() + ", " + entry.getValue() + "), ");
             insertItem(className, entry.getKey(), varOffset);
             varOffset += sizeOf(entry.getValue());

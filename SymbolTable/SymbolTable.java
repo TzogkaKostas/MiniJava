@@ -1,12 +1,13 @@
 package SymbolTable;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.*;
 
 public class SymbolTable {
 	String mainClassName;
-	HashMap<String, ClassInfo> classes;
+	LinkedHashMap<String, ClassInfo> classes;
 
 	public SymbolTable() {
-		classes = new HashMap<>();
+		classes = new LinkedHashMap<>();
 	}
 	
 	public void insertClass(String name, ClassInfo classInfo) {
@@ -41,6 +42,32 @@ public class SymbolTable {
 			return false;
 	}
 
+	public boolean classExtends(String base, String derived) {
+		ClassInfo classInfo = classes.get(derived);
+		if (classInfo == null) {
+			return false;
+		}
+		return classInfo.getExtendedName() == base; 
+	}
+
+	public boolean classHasMethod(String className, String methodName) {
+		ClassInfo classInfo = classes.get(className);
+		if (classInfo == null) {
+			return false;
+		}
+		return classInfo.isMethodDeclared(methodName);
+	}
+
+	public boolean validMethodArgs(String className, String methodName,
+			ArrayList<ExpressionInfo> args) {
+		return classes.get(className).getMethod(methodName).
+			validArguments(args);
+	}
+
+	public String getMethodReturnedType(String className, String methodName) {
+		return classes.get(className).getMethod(methodName).getReturnType();
+	}
+
 	public void print() {
 		for (String name: classes.keySet()){
 			System.out.print("class " + name);
@@ -48,5 +75,4 @@ public class SymbolTable {
 			System.out.println("");
 		}
 	}
-
 }

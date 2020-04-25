@@ -1,8 +1,5 @@
 import syntaxtree.*;
 import visitor.GJDepthFirst;
-
-import java.util.HashMap;
-
 import SymbolTable.*;
 
 public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
@@ -52,7 +49,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		variables.insert(argsName, "String[]");
 		n.f14.accept(this, variables);
 		
-		ClassInfo classInfo = new ClassInfo("main", new FunctionInfo("void", variables));
+		ClassInfo classInfo = new ClassInfo("main", new MethodInfo("void", variables));
 		symbolTable.insertClass(className, classInfo);
 		return className;
 	}
@@ -131,20 +128,20 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(MethodDeclaration n, Object argu) {
 		ClassInfo classInfo = (ClassInfo) argu;
 		String returnType = (String) n.f1.accept(this, argu);
-		String functionName = (String) n.f2.accept(this, argu);
+		String methodName = (String) n.f2.accept(this, argu);
 
-		FunctionInfo functionInfo = new FunctionInfo(returnType);
+		MethodInfo methodInfo = new MethodInfo(returnType);
 
 		Variables allVariables = new Variables();
 		n.f4.accept(this, allVariables);
-		functionInfo.setParameters(allVariables);
+		methodInfo.setParameters(allVariables);
 		n.f7.accept(this, allVariables);
-		functionInfo.setAllVariables(allVariables);
+		methodInfo.setAllVariables(allVariables);
 
-		if (classInfo.functionExists(functionName)) {
-			throw new Error("Method " + functionName + " already exists");
+		if (classInfo.methodExists(methodName)) {
+			throw new Error("Method " + methodName + " already exists");
 		}
-		classInfo.insertFunction(functionName, functionInfo);
+		classInfo.insertMethod(methodName, methodInfo);
 		return null;
 	}
 

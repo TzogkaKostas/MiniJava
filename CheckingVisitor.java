@@ -1,6 +1,7 @@
 import syntaxtree.*;
 import visitor.GJDepthFirst;
 import SymbolTable.*;
+import java.util.*;
 
 public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	SymbolTable symbolTable;
@@ -30,7 +31,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 		}
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
-		if (type != exprInfo.getType()) {
+		if (type != exprInfo.getType() && 
+				!symbolTable.classExtends(type, exprInfo.getType())) {
 			throw new Error("incompatible types: " + identifier + "(" + type + ")"
 				+ " = " + exprInfo.getType());
 		}
@@ -54,18 +56,15 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 		if (type == null) {
 			throw new Error("Identifier " + identifier + " is not declared");
 		}
-		if (!type.contains("[]"))  {
-			throw new Error("incompatible types: " + identifier + " is not array.");
-		}
 		
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
-		if (exprInfo.getType().contains("int")) {
+		if (exprInfo.getType() != "int") {
 			throw new Error("incompatible types: " + exprInfo.getType() +
-				"can't be an index");
+				"can't be an index of " + identifier);
 		}
 
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
-		if (type != exprInfo2.getType()) {
+		if (type != (exprInfo2.getType() + "[]")) {
 			throw new Error("incompatible types: " + identifier + "(" + type + ")"
 				+ " = " + exprInfo2.getType());
 		}
@@ -80,13 +79,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(AndExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().contains("boolean") ||
-				!exprInfo2.getType().contains("boolean")) {
+		if (exprInfo.getType() != "boolean" ||
+				exprInfo2.getType() != "boolean") {
 			throw new Error("incompatible types: " + exprInfo.getType() + " && " +
 				exprInfo2.getType());
 		}
-
-		return new ExpressionInfo("boolean");
+		return new ExpressionInfo("", "boolean", "");
 	}
 
    	/**
@@ -97,13 +95,13 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(CompareExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().contains("int") ||
-				!exprInfo2.getType().contains("int")) {
+		if (exprInfo.getType() != "int" ||
+				exprInfo2.getType() != "int") {
 			throw new Error("incompatible types: " + exprInfo.getType() + " < " +
 				exprInfo2.getType());
 		}
 
-		return new ExpressionInfo("boolean");
+		return new ExpressionInfo("", "boolean", "");
 	}
 
 	  /**
@@ -114,13 +112,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(PlusExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().contains("int") ||
-				!exprInfo2.getType().contains("int")) {
+		if (exprInfo.getType() != "int" || exprInfo2.getType() != "int") {
 			throw new Error("incompatible types: " + exprInfo.getType() + " + " +
-				exprInfo2.getType() );
+				exprInfo2.getType());
 		}
 
-		return new ExpressionInfo("int");
+		return new ExpressionInfo("", "int", "");
 	 }
   
 	 /**
@@ -131,13 +128,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	 public Object visit(MinusExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().contains("int") ||
-				!exprInfo2.getType().contains("int")) {
+		if (exprInfo.getType() != "int" || exprInfo2.getType() != "int") {
 			throw new Error("incompatible types: " + exprInfo.getType() + " - " +
-				exprInfo2.getType() );
+				exprInfo2.getType());
 		}
 
-		return new ExpressionInfo("int");
+		return new ExpressionInfo("", "int", "");
 	 }
   
 	 /**
@@ -148,13 +144,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	 public Object visit(TimesExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().contains("int") ||
-				!exprInfo2.getType().contains("int")) {
+		if (exprInfo.getType() != "int" || exprInfo2.getType() != "int") {
 			throw new Error("incompatible types: " + exprInfo.getType() + " * " +
-				exprInfo2.getType() );
+				exprInfo2.getType());
 		}
 
-		return new ExpressionInfo("int");
+		return new ExpressionInfo("", "int", "");
 	}
 	
    /**
@@ -165,9 +160,16 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(ArrayLookup n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
+		if (exprInfo.getId() == "") {
+			throw new Error("incompatible types: Id or new is only allowed before []");
+		}
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
+		if (exprInfo2.getType() != "int") {
+			throw new Error("incompatible types: " + exprInfo2.getType() +
+				"can't be an index");
+		}
 
-		return null;
+		return exprInfo;
 	 }
   
 	 /**
@@ -176,11 +178,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	  * f2 -> "length"
 	  */
 	 public Object visit(ArrayLength n, Object argu) {
-		R _ret=null;
-		n.f0.accept(this, argu);
-		n.f1.accept(this, argu);
-		n.f2.accept(this, argu);
-		return _ret;
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
+		if (!exprInfo.getType().contains("[]")) {
+			throw new Error("incompatible types: " + exprInfo.toString() +
+				": length is only valid for array");
+		}
+		return new ExpressionInfo("", "int", "");
 	 }
   
 	 /**
@@ -192,26 +195,47 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	  * f5 -> ")"
 	  */
 	 public Object visit(MessageSend n, Object argu) {
-		R _ret=null;
-		n.f0.accept(this, argu);
-		n.f1.accept(this, argu);
-		n.f2.accept(this, argu);
-		n.f3.accept(this, argu);
-		n.f4.accept(this, argu);
-		n.f5.accept(this, argu);
-		return _ret;
+		StatementInfo statementInfo = (StatementInfo) argu;
+
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
+		String identifier = (String) n.f2.accept(this, argu);
+		if (exprInfo.getId() == "") {
+			throw new Error("incompatible types: invalid use of dot (.) operator: " +
+				exprInfo.toString());
+		}
+		if (!symbolTable.classHasMethod(exprInfo.getType(), identifier)) {
+			throw new Error("incompatible types: There isn't any method declaration of " +
+				identifier + " in class " + exprInfo.getType());
+		}
+
+		ArrayList<ExpressionInfo> args = new ArrayList<ExpressionInfo>();
+		Object array[] = new Object[2];
+		array[0] = (Object) statementInfo;
+		array[1] = (Object) args;
+		n.f4.accept(this, array);
+		if (!symbolTable.validMethodArgs(exprInfo.getType(), identifier, args)) {
+			throw new Error("incompatible types: invalid arguments of function " + 
+				exprInfo.getType() + "." + identifier);
+		}
+
+		return new ExpressionInfo("", "int", "");
 	 }
   
-	 /**
+	/**
 	  * f0 -> Expression()
 	  * f1 -> ExpressionTail()
-	  */
-	 public Object visit(ExpressionList n, Object argu) {
-		R _ret=null;
-		n.f0.accept(this, argu);
+	*/
+	public Object visit(ExpressionList n, Object argu) {
+		Object array[] = (Object[]) argu;
+		StatementInfo statementInfo = (StatementInfo) array[0];
+		ArrayList<ExpressionInfo> args = (ArrayList<ExpressionInfo>) array[1];
+
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, statementInfo);
+		args.add(exprInfo);
+		
 		n.f1.accept(this, argu);
-		return _ret;
-	 }
+		return null;
+	}
   
 	 /**
 	  * f0 -> ( ExpressionTerm() )*
@@ -225,10 +249,13 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	  * f1 -> Expression()
 	  */
 	 public Object visit(ExpressionTerm n, Object argu) {
-		R _ret=null;
-		n.f0.accept(this, argu);
-		n.f1.accept(this, argu);
-		return _ret;
+		Object array[] = (Object[]) argu;
+		StatementInfo statementInfo = (StatementInfo) array[0];
+		ArrayList<ExpressionInfo> args = (ArrayList<ExpressionInfo>) array[1];
+
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f1.accept(this, statementInfo);
+		args.add(exprInfo);
+		return null;
 	 }
 
 	/**
@@ -253,27 +280,27 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 		StatementInfo statementInfo = (StatementInfo) argu;
 
 		if (n.f0.which == 1) {
-			return new ExpressionInfo("int", (String) n.f0.accept(this, null));
+			return new ExpressionInfo("", "int", (String) n.f0.accept(this, null));
 		}
 		else if (n.f0.which == 2 || n.f0.which == 3 ) {
-			return new ExpressionInfo("boolean");
+			return new ExpressionInfo("", "boolean", (String) n.f0.accept(this, null));
 		}
 		else if (n.f0.which == 4) {
 			String variable = (String) n.f0.accept(this, null);
 			if (!statementInfo.isVarDeclared(variable)) {
 				throw new Error("Identifier " + variable + " is not declared");
 			}
-			return new ExpressionInfo("identifier", variable);
+			return new ExpressionInfo(variable, statementInfo.getType(variable), "");
 		}
 		else if (n.f0.which == 5) {
-			return new ExpressionInfo("this");
+			return new ExpressionInfo("", "", "this");
 		}
 		else if (n.f0.which == 7) {
 			String className = (String) n.f0.accept(this, null);
 			if (!symbolTable.classExists(className)) {
 				throw new Error("Class " + className + " is not declared");
 			}
-			return new ExpressionInfo("identifier", className);
+			return new ExpressionInfo("new", className, "");
 		}
 		else { // 6 || 8
 			return n.f0.accept(this, argu);
@@ -288,7 +315,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(BooleanArrayAllocationExpression n, Object argu) {
 		n.f3.accept(this, argu);
-		return new ExpressionInfo("boolean[]");
+		return new ExpressionInfo("new", "boolean[]", "");
 	}
 
    /**
@@ -300,7 +327,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	*/
    public Object visit(IntegerArrayAllocationExpression n, Object argu) {
 		n.f3.accept(this, argu);
-		return new ExpressionInfo("int[]");
+		return new ExpressionInfo("new", "int[]", "");
    	}
 
 	/**
@@ -310,7 +337,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	* f3 -> ")"
 	*/
 	public Object visit(AllocationExpression n, Object argu) {
-		return n.f1.accept(this, argu);
+		return new ExpressionInfo("new", (String) n.f1.accept(this, argu), "");
 	}
 
 	
@@ -419,9 +446,9 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(MethodDeclaration n, Object argu) {
 		ClassInfo classInfo = (ClassInfo) argu;
-		String functionName = (String) n.f2.accept(this, argu);
+		String methodName = (String) n.f2.accept(this, argu);
 		
-		n.f8.accept(this, new StatementInfo(classInfo, functionName));
+		n.f8.accept(this, new StatementInfo(classInfo, methodName));
 		return null;
 	}
 
