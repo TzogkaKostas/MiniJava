@@ -19,7 +19,7 @@ class Main {
 			fis = new FileInputStream(fileName);
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			Goal root = parser.Goal();
-			System.err.println("Program parsed successfully.\n");
+			System.err.println(fileName + " parsed successfully.\n");
  
 			IdentifierVisitor idVisitor = new IdentifierVisitor();
 			root.accept(idVisitor, null);

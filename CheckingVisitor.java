@@ -238,7 +238,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 				exprInfo.toString());
 		}
 		if (exprInfo.getValue().equals("this")) {
-			if (!statementInfo.isMethodDeclared(identifier)) {
+			if (!statementInfo.classHasMethod(identifier)) {
 				throw new Error("incompatible types: There isn't a declaration of method " +
 					identifier + " in class this ");
 			}
@@ -348,12 +348,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		}
 		else if (n.f0.which == 3) {
 			String variable = (String) n.f0.accept(this, null);
-			if (!statementInfo.isVarDeclared(variable)) {
-				System.out.println(variable);
+			String type = statementInfo.getType(variable);
+			if (type == null) {
 				statementInfo.print();
 				throw new Error("Identifier " + variable + " is not declared");
 			}
-			return new ExpressionInfo(variable, statementInfo.getType(variable), "");
+			return new ExpressionInfo(variable, type, "");
 		}
 		else if (n.f0.which == 4) {
 			return new ExpressionInfo("", "", "this");

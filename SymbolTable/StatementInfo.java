@@ -30,22 +30,26 @@ public class StatementInfo {
 		this.curMethodName = curMethodName;
 	}
 
-	public boolean isVarDeclared(String identifier) {
-		MethodInfo methodInfo = classInfo.getMethod(curMethodName);
-		if (classInfo.isVarDeclared(identifier) || methodInfo.isDeclared(identifier)) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
+	// public boolean isVarDeclared(String identifier) {
+	// 	MethodInfo methodInfo = classInfo.getMethod(curMethodName);
+	// 	if (classInfo.isVarDeclared(identifier) || methodInfo.isDeclared(identifier)) {
+	// 		return true;
+	// 	}
+	// 	else {
+	// 		return false;
+	// 	}
+	// }
 
-	public boolean isMethodDeclared(String methodName) {
+	public boolean classHasMethod(String methodName) {
 		return classInfo.isMethodDeclared(methodName);
 	}
 
 	public boolean validMethodArgs(String methodName, ArrayList<ExpressionInfo> args) {
-		return classInfo.getMethod(methodName).validArguments(args);
+		MethodInfo methodInfo = classInfo.getMethod(methodName);
+		if (methodInfo == null ) {
+			methodInfo = classInfo.getExtendsInfo().getMethod(methodName);
+		}
+		return methodInfo.validArguments(args);
 	}
 
 	public String getType(String identifier) {
@@ -54,12 +58,14 @@ public class StatementInfo {
 		if (type != null) {
 			return type;
 		}
-		else {
-			return classInfo.getVarType(identifier);
-		}
+		return classInfo.getVarType(identifier);
 	}
 
 	public String getMethodReturnedType(String methodName) {
+		MethodInfo methodInfo = classInfo.getMethod(methodName);
+		if (methodInfo == null ) {
+			methodInfo = classInfo.getExtendsInfo().getMethod(methodName);
+		}
 		return classInfo.getMethod(methodName).getReturnType();
 	}
 

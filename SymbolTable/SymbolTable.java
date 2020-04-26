@@ -52,20 +52,33 @@ public class SymbolTable {
 
 	public boolean classHasMethod(String className, String methodName) {
 		ClassInfo classInfo = classes.get(className);
-		if (classInfo == null) {
+		if (classInfo.isMethodDeclared(methodName)) {
+			return true;
+		}
+		ClassInfo extendsClass = classInfo.getExtendsInfo();
+		if (extendsClass != null) {
+			return extendsClass.isMethodDeclared(methodName);
+		}
+		else {
 			return false;
 		}
-		return classInfo.isMethodDeclared(methodName);
 	}
 
 	public boolean validMethodArgs(String className, String methodName,
-			ArrayList<ExpressionInfo> args) {
-		return classes.get(className).getMethod(methodName).
-			validArguments(args);
+			ArrayList<ExpressionInfo> args) {		
+		MethodInfo methodInfo = getClassInfo(className).getMethod(methodName);
+		if (methodInfo == null) {
+			methodInfo = getClassInfo(className).getExtendsInfo().getMethod(methodName);
+		}
+		return methodInfo.validArguments(args);
 	}
 
 	public String getMethodReturnedType(String className, String methodName) {
-		return classes.get(className).getMethod(methodName).getReturnType();
+		MethodInfo methodInfo = getClassInfo(className).getMethod(methodName);
+		if (methodInfo == null) {
+			methodInfo = getClassInfo(className).getExtendsInfo().getMethod(methodName);
+		}
+		return methodInfo.getReturnType();
 	}
 
 	public void print() {

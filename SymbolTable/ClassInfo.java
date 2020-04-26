@@ -97,7 +97,14 @@ public class ClassInfo {
 	}
 
 	public String getVarType(String identifier) {
-		return variables.lookup(identifier);
+		String type = variables.lookup(identifier);
+		if (type != null ){
+			return type;
+		}
+		if (extendsInfo != null) {
+			return extendsInfo.getVarType(identifier);
+		}
+		return null;
 	}
 
 	public boolean validDeclaration(String methodName, MethodInfo methodInfo) {

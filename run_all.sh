@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
+args="";
+for file in $1*; do
+    args=$args" "$file;
+done
 make
-java Main $1
+java Main $args
