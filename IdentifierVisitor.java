@@ -97,7 +97,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String extendsName = (String) n.f3.accept(this, argu);
 		ClassInfo extendsClass = symbolTable.getClassInfo(extendsName);
 		if (extendsClass == null) {
-			throw new Error("Extends Class " + extendsClass + " is not declared");
+			throw new Error("Extending Class " + extendsClass + " is not declared");
 		}
 		ClassInfo classInfo = new ClassInfo(extendsName, extendsClass, variables);
 
@@ -138,8 +138,8 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		n.f7.accept(this, allVariables);
 		methodInfo.setAllVariables(allVariables);
 
-		if (classInfo.methodExists(methodName) && !classInfo.isOverload(methodName, methodInfo)) {
-			throw new Error("Method " + methodName + " already exists");
+		if (!classInfo.validDeclaration(methodName, methodInfo)) {
+			throw new Error("Invalid declaration of method " + methodName);
 		}
 		classInfo.insertMethod(methodName, methodInfo);
 		return null;

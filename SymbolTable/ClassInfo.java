@@ -10,6 +10,10 @@ public class ClassInfo {
 	Variables variables;
 	LinkedHashMap<String, MethodInfo> methods;
 
+	public ClassInfo getExtendsInfo() {
+		return this.extendsInfo;
+	}
+
 	public ClassInfo(Variables variables) {
 		this.extendsName = "";
 		this.variables = variables;
@@ -96,6 +100,22 @@ public class ClassInfo {
 		return variables.lookup(identifier);
 	}
 
+	public boolean validDeclaration(String methodName, MethodInfo methodInfo) {
+		if (methodExists(methodName)) {
+			return false;
+		}
+		if (extendsInfo == null) {
+			return true;
+		}
+		if (extendsInfo.methodExists(methodName)) {
+			return isOverridden(methodName, methodInfo);
+		}
+		else {
+			return true;
+		}
+	}
+
+
 	public boolean methodExists(String methodName) {
 		if (methods.get(methodName) != null)
 			return true;
@@ -103,12 +123,18 @@ public class ClassInfo {
 			return false;
 	}
 
-	public boolean isOverload(String methodName, MethodInfo methodInfo) {
-		MethodInfo otherMethodInfo = methods.get(methodName);
-		if (otherMethodInfo == null) {
-			return false;
-		}
-		return !otherMethodInfo.validArguments(getAsList(methodInfo.getParameters()));
+	// public boolean isOverload(String methodName, MethodInfo methodInfo) {
+	// 	MethodInfo otherMethodInfo = methods.get(methodName);
+	// 	if (otherMethodInfo == null) {
+	// 		return false;
+	// 	}
+	// 	return !otherMethodInfo.validArguments(getAsList(methodInfo.getParameters()));
+	// }
+
+	public boolean isOverridden(String methodName, MethodInfo methodInfo) {
+		MethodInfo otherMethodInfo = extendsInfo.getMethod(methodName);
+		return otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
+			otherMethodInfo.validArguments(getAsList(methodInfo.getParameters()));
 	}
 
 	public ArrayList<ExpressionInfo> getAsList(Variables vars) {

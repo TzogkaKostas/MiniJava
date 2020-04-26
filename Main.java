@@ -4,13 +4,19 @@ import SymbolTable.*;
 
 class Main {
     public static void main (String [] args){
-		if(args.length != 1){
-			System.err.println("Usage: java Driver <inputFile>");
+		if(args.length == 0){
+			System.err.println("Usage: java Main <inputFiles>");
 			System.exit(1);
 		}
+		for (String arg : args) {
+			semanticAnalysis(arg);
+		}
+	}
+	
+	public static void semanticAnalysis(String fileName) {
 		FileInputStream fis = null;
 		try{
-			fis = new FileInputStream(args[0]);
+			fis = new FileInputStream(fileName);
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			Goal root = parser.Goal();
 			System.err.println("Program parsed successfully.\n");
@@ -38,5 +44,5 @@ class Main {
 				System.err.println(ex.getMessage());
 			}
 		}
-    }
+	}
 }
