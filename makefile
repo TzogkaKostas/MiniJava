@@ -4,8 +4,8 @@ main: Main.java
 	javac Main.java
 
 SymbolTable: SymbolTable/SymbolTable.java SymbolTable/ClassInfo.java SymbolTable/MethodInfo.java \
-		SymbolTable/Variables.java \
-		SymbolTable/StatementInfo.java SymbolTable/ExpressionInfo.java
+		SymbolTable/Variables.java SymbolTable/StatementInfo.java SymbolTable/ExpressionInfo.java \
+		SymbolTable/OffsetTable.java
 	javac SymbolTable/*.java
 
 CheckingVisitor: CheckingVisitor.java

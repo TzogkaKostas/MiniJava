@@ -5,20 +5,30 @@ import java.util.*;
 
 public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	SymbolTable symbolTable;
+	OffsetTable offsetTable;
+	Integer varOffset;
+	Integer methodOffset;
 	
 	CheckingVisitor(SymbolTable symbolTable) {
 		this.symbolTable = symbolTable;
+		this.offsetTable = new OffsetTable();
+		this.varOffset = 0;
+		this.methodOffset = 0;
 	}
 
 	public SymbolTable getSymbolTable() {
 		return this.symbolTable;
 	}
 
+	public OffsetTable getOffsetTable() {
+		return this.offsetTable;
+	}
+
 	public void terminate(String errorMessage) {
 		// System.out.print(errorMessage);
 		// System.exit(1);
 	}
-	
+		
 
    	/**
 	* f0 -> Identifier()
@@ -440,6 +450,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(MainClass n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
+		classInfo.setVarOffset(0);
 		
 		n.f15.accept(this, new StatementInfo(classInfo, "main"));
 		return null;
@@ -456,6 +467,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(ClassDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
+
+		offsetTable.insertClass(className, classInfo);
 
 		n.f4.accept(this, classInfo);
 		return null;
@@ -475,6 +488,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
 
+		offsetTable.insertClass(className, classInfo);
+		
 		n.f6.accept(this, classInfo);
 		return null;
 	}

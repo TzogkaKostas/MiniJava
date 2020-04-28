@@ -12,7 +12,7 @@ class Main {
 			semanticAnalysis(arg);
 		}
 	}
-	
+
 	public static void semanticAnalysis(String fileName) {
 		FileInputStream fis = null;
 		try{
@@ -26,7 +26,8 @@ class Main {
 
 			CheckingVisitor checkingVisitor = new CheckingVisitor(symbolTable);
 			root.accept(checkingVisitor, null);
-			System.err.println(fileName + " is semantically correct.\n");			
+			System.err.println(fileName + " is semantically correct.\n");
+			checkingVisitor.getOffsetTable().print();			
 		}
 		catch (RuntimeException e) {
 			System.out.println(fileName + " error : " + e.getMessage() + "\n");

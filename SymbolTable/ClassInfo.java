@@ -9,10 +9,8 @@ public class ClassInfo {
 	ClassInfo extendsInfo;
 	Variables variables;
 	LinkedHashMap<String, MethodInfo> methods;
-
-	public ClassInfo getExtendsInfo() {
-		return this.extendsInfo;
-	}
+	Integer varOffset;
+	Integer methodsSize;
 
 	public ClassInfo(String name, Variables variables) {
 		this.name = name;
@@ -53,6 +51,10 @@ public class ClassInfo {
 		return name;
 	}
 
+	public ClassInfo getExtendsInfo() {
+		return this.extendsInfo;
+	}
+
 	public void setExtendedName(String extendsName) {
 		this.extendsName = extendsName;
 	}
@@ -68,6 +70,10 @@ public class ClassInfo {
 	public void setVariables(Variables variables) {
 		this.variables = variables;
 	}
+
+	public void setVarOffset(Integer varOffset) {
+		this.varOffset = varOffset;
+	}	
 
 	public LinkedHashMap<String,MethodInfo> getMethods() {
 		return this.methods;
@@ -90,14 +96,13 @@ public class ClassInfo {
 		}
 	}
 
-	// public boolean isVarDeclared(String variable) {
-	// 	if (variables.exists(variable)) {
-	// 		return true;
-	// 	}
-	// 	else {
-	// 		return false;
-	// 	}
-	// }
+	public Integer getVarOffset() {
+		return this.varOffset;
+	}
+
+	public Integer getMethodOffset() {
+		return this.methodsSize;
+	}
 
 	public boolean isMethodDeclared(String methodName) {
 		if (methods.get(methodName) != null) {
@@ -190,7 +195,7 @@ public class ClassInfo {
 	}
 
 	public void print() {
-		if (variables != null && variables.getSize() != 0) {
+		if (variables.getSize() != 0) {
 			System.out.print("fields: ");
 			variables.print();	
 		}
