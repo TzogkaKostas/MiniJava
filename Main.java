@@ -19,17 +19,17 @@ class Main {
 			fis = new FileInputStream(fileName);
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			Goal root = parser.Goal();
-			System.err.println(fileName + " parsed successfully.");
- 
+			
 			IdentifierVisitor idVisitor = new IdentifierVisitor();
 			root.accept(idVisitor, null);
-
 			SymbolTable symbolTable = idVisitor.getSymbolTable();
-			// symbolTable.print();
 
 			CheckingVisitor checkingVisitor = new CheckingVisitor(symbolTable);
 			root.accept(checkingVisitor, null);
-			System.err.println(fileName + " is semantically correct.\n");
+			System.err.println(fileName + " is semantically correct.\n");			
+		}
+		catch (RuntimeException e) {
+			System.out.println(fileName + " error : " + e.getMessage() + "\n");
 		}
 		catch(ParseException ex){
 			System.out.println(ex.getMessage());

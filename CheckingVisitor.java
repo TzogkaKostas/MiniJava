@@ -32,14 +32,13 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String identifier = (String) n.f0.accept(this, statementInfo);
 		String type = statementInfo.getType(identifier);
 		if (type == null) {
-			throw new Error("Identifier " + identifier + " is not declared");
+			throw new RuntimeException("Identifier " + identifier + " is not declared");
 		}		
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
-
 		if (!type.equals(exprInfo.getType()) && 
 				!symbolTable.classExtends(type, exprInfo.getType())) {	
-			throw new Error("incompatible types: " + type + "(" + identifier + ")"
+			throw new RuntimeException(type + "(" + identifier + ")"
 				+ " = " + exprInfo.getType());
 		}
 		return null;
@@ -60,18 +59,18 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String identifier = (String) n.f0.accept(this, statementInfo);
 		String type = statementInfo.getType(identifier);
 		if (type == null) {
-			throw new Error("Identifier " + identifier + " is not declared");
+			throw new RuntimeException("Identifier " + identifier + " is not declared");
 		}
 		
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
 		if (!exprInfo.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo.getType() +
+			throw new RuntimeException(exprInfo.getType() +
 				" can't be an index of " + identifier);
 		}
 
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
 		if (!type.equals(exprInfo2.getType() + "[]")) {
-			throw new Error("incompatible types: " + type + "(" + identifier + ")"
+			throw new RuntimeException(type + "(" + identifier + ")"
 				+ " = " + exprInfo2.getType());	
 		}
 		return null;
@@ -88,7 +87,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(PrintStatement n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo.getType() +
+			throw new RuntimeException(exprInfo.getType() +
 				" can't be an argument of System.out.println");
 		}
 		return null;
@@ -104,7 +103,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo.getType().equals("boolean") ||
 				!exprInfo2.getType().equals("boolean")) {
-			throw new Error("incompatible types: " + exprInfo.getType() + " && " +
+			throw new RuntimeException(exprInfo.getType() + " && " +
 				exprInfo2.getType());
 		}
 		return new ExpressionInfo("", "boolean", "");
@@ -120,7 +119,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo.getType().equals("int") ||
 				!exprInfo2.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo.getType() + " < " +
+			throw new RuntimeException(exprInfo.getType() + " < " +
 				exprInfo2.getType());
 		}
 
@@ -136,7 +135,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo.getType().equals("int") || !exprInfo2.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo.getType() + " + " +
+			throw new RuntimeException(exprInfo.getType() + " + " +
 				exprInfo2.getType());
 		}
 
@@ -152,7 +151,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo.getType().equals("int") || !exprInfo2.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo.getType() + " - " +
+			throw new RuntimeException(exprInfo.getType() + " - " +
 				exprInfo2.getType());
 		}
 
@@ -168,7 +167,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo.getType().equals("int") || !exprInfo2.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo.getType() + " * " +
+			throw new RuntimeException(exprInfo.getType() + " * " +
 				exprInfo2.getType());
 		}
 
@@ -184,14 +183,14 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(ArrayLookup n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		if (exprInfo.getId().equals("")) {
-			throw new Error("incompatible types: Id or new is only allowed before []");
+			throw new RuntimeException("Id or new is only allowed before []");
 		}
 		if (!exprInfo.getType().contains("[]")) {
-			throw new Error("incompatible types: " + exprInfo.getId() + " is not an array");
+			throw new RuntimeException(exprInfo.getId() + " is not an array");
 		}
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
 		if (!exprInfo2.getType().equals("int")) {
-			throw new Error("incompatible types: " + exprInfo2.getType() +
+			throw new RuntimeException(exprInfo2.getType() +
 				" can't be an index");
 		}
 
@@ -207,7 +206,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	 public Object visit(ArrayLength n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		if (!exprInfo.getType().contains("[]")) {
-			throw new Error("incompatible types: " + exprInfo.toString() +
+			throw new RuntimeException(exprInfo.toString() +
 				": length is only valid for array");
 		}
 		return new ExpressionInfo("", "int", "");
@@ -227,11 +226,11 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		String identifier = (String) n.f2.accept(this, argu);
 		if (exprInfo.getType().contains("int") || exprInfo.getType().contains("boolean") ) {
-			throw new Error("incompatible types: dot (.) operator can't be on " +
+			throw new RuntimeException("dot (.) operator can't be on " +
 				exprInfo.getType());
 		}
 		if (!symbolTable.classHasMethod(exprInfo.getType(), identifier)) {
-			throw new Error("incompatible types: There isn't a declaration of method " +
+			throw new RuntimeException("There isn't a declaration of method " +
 				identifier + " in class " + exprInfo.getType());
 		}
 
@@ -242,7 +241,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		n.f4.accept(this, array);
 		if (!symbolTable.validMethodArgs(symbolTable, exprInfo.getType(),
 				identifier, args)) {
-			throw new Error("incompatible types: invalid arguments at function call " + 
+			throw new RuntimeException("invalid arguments at function call " + 
 				exprInfo.getType() + "." + identifier);
 		}
 
@@ -321,7 +320,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 			String variable = (String) n.f0.accept(this, null);
 			String type = statementInfo.getType(variable);
 			if (type == null) {
-				throw new Error("Identifier " + variable + " is not declared");
+				throw new RuntimeException("Identifier " + variable + " is not declared");
 			}
 			return new ExpressionInfo(variable, type, "");
 		}
@@ -331,7 +330,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		else if (n.f0.which == 6) {
 			ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, null);
 			if (!symbolTable.classExists(exprInfo.getType())) {
-				throw new Error("Class " + exprInfo.getType() + " is not declared");
+				throw new RuntimeException("Class " + exprInfo.getType() + " is not declared");
 			}
 			return new ExpressionInfo("new", exprInfo.getType(), "");
 		}
@@ -505,7 +504,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f10.accept(this, statementInfo);
 		if (!type.equals(exprInfo.getType())) {
-			throw new Error("method " + methodName + " must return " + type + ", not " + 
+			throw new RuntimeException("method " + methodName + " must return " + type + ", not " + 
 				exprInfo.getType());
 		}
 		return null;

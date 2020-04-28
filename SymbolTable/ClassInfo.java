@@ -130,7 +130,7 @@ public class ClassInfo {
 			return true;
 		}
 		if (extendsInfo.methodExists(methodName)) {
-			return isOverridden(methodName, methodInfo);
+			return extendsInfo.isOverridden(methodName, methodInfo);
 		}
 		else {
 			return true;
@@ -165,7 +165,7 @@ public class ClassInfo {
 	// }
 
 	public boolean isOverridden(String methodName, MethodInfo methodInfo) {
-		MethodInfo otherMethodInfo = extendsInfo.getMethod(methodName);
+		MethodInfo otherMethodInfo = getMethod(methodName);
 		if (otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
 				otherMethodInfo.exactValidArguments(getAsList(methodInfo.getParameters()))) {
 			return true;
