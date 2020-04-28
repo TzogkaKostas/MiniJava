@@ -15,8 +15,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	}
 
 	public void terminate(String errorMessage) {
-		System.out.print(errorMessage);
-		System.exit(1);
+		// System.out.print(errorMessage);
+		// System.exit(1);
 	}
 	
 
@@ -37,15 +37,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
 
-		String className;
-		if (exprInfo.getValue().equals("this")) {
-			className = statementInfo.getMainName();
-		}
-		else {
-			className = exprInfo.getType(); 
-		}
-		if (!type.equals(className) && 
-				!symbolTable.classExtends(type, className)) {	
+		if (!type.equals(exprInfo.getType()) && 
+				!symbolTable.classExtends(type, exprInfo.getType())) {	
 			throw new Error("incompatible types: " + type + "(" + identifier + ")"
 				+ " = " + exprInfo.getType());
 		}
@@ -233,50 +226,28 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		String identifier = (String) n.f2.accept(this, argu);
-		if (exprInfo.getId().equals("") && !exprInfo.getValue().equals("this")) {
-			throw new Error("incompatible types: invalid use of dot (.) operator: " +
-				exprInfo.toString());
+		if (exprInfo.getType().contains("int") || exprInfo.getType().contains("boolean") ) {
+			throw new Error("incompatible types: dot (.) operator can't be on " +
+				exprInfo.getType());
 		}
-		if (exprInfo.getValue().equals("this")) {
-			if (!statementInfo.classHasMethod(identifier)) {
-				throw new Error("incompatible types: There isn't a declaration of method " +
-					identifier + " in class this ");
-			}
+		if (!symbolTable.classHasMethod(exprInfo.getType(), identifier)) {
+			throw new Error("incompatible types: There isn't a declaration of method " +
+				identifier + " in class " + exprInfo.getType());
 		}
-		else {
-			if (!symbolTable.classHasMethod(exprInfo.getType(), identifier)) {
-				throw new Error("incompatible types: There isn't a declaration of method " +
-					identifier + " in class " + exprInfo.getType());
-			}
-		}
-
 
 		ArrayList<ExpressionInfo> args = new ArrayList<ExpressionInfo>();
 		Object array[] = new Object[2];
 		array[0] = (Object) statementInfo;
 		array[1] = (Object) args;
 		n.f4.accept(this, array);
-		if (exprInfo.getValue().equals("this")) {
-			if (!statementInfo.validMethodArgs(identifier, args)) {
-				throw new Error("incompatible types: invalid arguments at function call " + 
-					"this." + identifier);
-			}
-		}
-		else {
-			if (!symbolTable.validMethodArgs(exprInfo.getType(), identifier, args)) {
-				throw new Error("incompatible types: invalid arguments at function call " + 
-					exprInfo.getType() + "." + identifier);
-			}
+		if (!symbolTable.validMethodArgs(symbolTable, exprInfo.getType(),
+				identifier, args)) {
+			throw new Error("incompatible types: invalid arguments at function call " + 
+				exprInfo.getType() + "." + identifier);
 		}
 
-		String type;
-		if (exprInfo.getValue().equals("this")) {
-			type = statementInfo.getMethodReturnedType(identifier);
-		}
-		else {
-			type = symbolTable.getMethodReturnedType(exprInfo.getType(), identifier);
-		}
-		return new ExpressionInfo("", type, "");
+		return new ExpressionInfo("", 
+			symbolTable.getMethodReturnedType(exprInfo.getType(), identifier), "");
 	 }
   
 	/**
@@ -350,13 +321,12 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 			String variable = (String) n.f0.accept(this, null);
 			String type = statementInfo.getType(variable);
 			if (type == null) {
-				statementInfo.print();
 				throw new Error("Identifier " + variable + " is not declared");
 			}
 			return new ExpressionInfo(variable, type, "");
 		}
 		else if (n.f0.which == 4) {
-			return new ExpressionInfo("", "", "this");
+			return new ExpressionInfo("", statementInfo.getName(), "this");
 		}
 		else if (n.f0.which == 6) {
 			ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, null);
@@ -471,7 +441,6 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(MainClass n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
-		classInfo.setName(className);
 		
 		n.f15.accept(this, new StatementInfo(classInfo, "main"));
 		return null;
@@ -488,7 +457,6 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(ClassDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
-		classInfo.setName(className);
 
 		n.f4.accept(this, classInfo);
 		return null;
@@ -507,7 +475,6 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(ClassExtendsDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
-		classInfo.setName(className);
 
 		n.f6.accept(this, classInfo);
 		return null;

@@ -49,7 +49,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		variables.insert(argsName, "String[]");
 		n.f14.accept(this, variables);
 		
-		ClassInfo classInfo = new ClassInfo("main", new MethodInfo("void", variables));
+		ClassInfo classInfo = new ClassInfo(className, "main", new MethodInfo("void", variables));
 		symbolTable.insertClass(className, classInfo);
 		return className;
 	}
@@ -68,7 +68,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		Variables variables = new Variables();
 		n.f3.accept(this, variables);
 
-		ClassInfo classInfo = new ClassInfo(variables);
+		ClassInfo classInfo = new ClassInfo(className, variables);
 		n.f4.accept(this, classInfo);
 
 		if (symbolTable.classExists(className) && !className.equals("main")) {
@@ -99,7 +99,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		if (extendsClass == null) {
 			throw new Error("Extending Class " + extendsClass + " is not declared");
 		}
-		ClassInfo classInfo = new ClassInfo(extendsName, extendsClass, variables);
+		ClassInfo classInfo = new ClassInfo(className, extendsName, extendsClass, variables);
 
 		n.f6.accept(this, classInfo);
 

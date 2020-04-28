@@ -18,7 +18,7 @@ public class StatementInfo {
 		this.classInfo = classInfo;
 	}
 
-	public String getMainName() {
+	public String getName() {
 		return classInfo.getName();
 	}
 
@@ -44,12 +44,12 @@ public class StatementInfo {
 		return classInfo.isMethodDeclared(methodName);
 	}
 
-	public boolean validMethodArgs(String methodName, ArrayList<ExpressionInfo> args) {
+	public boolean validMethodArgs(SymbolTable symbolTable, String methodName, ArrayList<ExpressionInfo> args) {
 		MethodInfo methodInfo = classInfo.getMethod(methodName);
 		if (methodInfo == null ) {
 			methodInfo = classInfo.getExtendsInfo().getMethod(methodName);
 		}
-		return methodInfo.validArguments(args);
+		return methodInfo.validArguments(symbolTable, args);
 	}
 
 	public String getType(String identifier) {

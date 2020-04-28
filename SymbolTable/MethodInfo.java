@@ -65,14 +65,37 @@ public class MethodInfo {
 		return allVariables.lookup(identifier);
 	}
 
-	public boolean validArguments(ArrayList<ExpressionInfo> args) {
+	public boolean validArguments(SymbolTable symbolTable, ArrayList<ExpressionInfo> args) {
 		LinkedHashMap<String, String> params = parameters.getVariables();
 		if (args.size() != params.size()) {
 			return false;
 		}
 		int i = 0;
 		for (Entry<String, String> entry : params.entrySet()) {
-			if (!args.get(i).getType().equals(entry.getValue()) ) {
+			ClassInfo classInfo = symbolTable.getClassInfo(args.get(i).getType());
+			if (classInfo != null) {
+				if (!classInfo.equivalentType(entry.getValue())) {
+					return false;
+				}
+			}
+			else {
+				if (!args.get(i).getType().equals(entry.getValue())) {
+					return false;
+				}
+			}
+			i++;
+		}
+		return true;
+	}
+
+	public boolean exactValidArguments(ArrayList<ExpressionInfo> args) {
+		LinkedHashMap<String, String> params = parameters.getVariables();
+		if (args.size() != params.size()) {
+			return false;
+		}
+		int i = 0;
+		for (Entry<String, String> entry : params.entrySet()) {
+			if (!args.get(i).getType().equals(entry.getValue())) {
 				return false;
 			}
 			i++;

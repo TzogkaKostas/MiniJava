@@ -51,26 +51,16 @@ public class SymbolTable {
 	}
 
 	public boolean classHasMethod(String className, String methodName) {
-		ClassInfo classInfo = classes.get(className);
-		if (classInfo.isMethodDeclared(methodName)) {
-			return true;
-		}
-		ClassInfo extendsClass = classInfo.getExtendsInfo();
-		if (extendsClass != null) {
-			return extendsClass.isMethodDeclared(methodName);
-		}
-		else {
-			return false;
-		}
+		return classes.get(className).isMethodDeclared(methodName);
 	}
 
-	public boolean validMethodArgs(String className, String methodName,
+	public boolean validMethodArgs(SymbolTable symbolTable, String className, String methodName,
 			ArrayList<ExpressionInfo> args) {		
 		MethodInfo methodInfo = getClassInfo(className).getMethod(methodName);
 		if (methodInfo == null) {
 			methodInfo = getClassInfo(className).getExtendsInfo().getMethod(methodName);
 		}
-		return methodInfo.validArguments(args);
+		return methodInfo.validArguments(symbolTable, args);
 	}
 
 	public String getMethodReturnedType(String className, String methodName) {

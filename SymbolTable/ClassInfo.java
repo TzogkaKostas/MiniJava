@@ -14,20 +14,23 @@ public class ClassInfo {
 		return this.extendsInfo;
 	}
 
-	public ClassInfo(Variables variables) {
+	public ClassInfo(String name, Variables variables) {
+		this.name = name;
 		this.extendsName = "";
 		this.variables = variables;
 		this.methods = new LinkedHashMap<>();
 	}
 
-	public ClassInfo(String extendsName, ClassInfo extendsInfo, Variables variables) {
+	public ClassInfo(String name, String extendsName, ClassInfo extendsInfo, Variables variables) {
+		this.name = name;
 		this.extendsName = extendsName;
 		this.extendsInfo = extendsInfo;
 		this.variables = variables;
 		this.methods = new LinkedHashMap<>();
 	}
 
-	public ClassInfo(String methodName, MethodInfo methodInfo) {
+	public ClassInfo(String name, String methodName, MethodInfo methodInfo) {
+		this.name = name;
 		this.extendsName = "";
 		this.variables = new Variables();
 		this.methods = new LinkedHashMap<>();
@@ -42,9 +45,9 @@ public class ClassInfo {
 		methods.put(name, method);
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+	// public void setName(String name) {
+	// 	this.name = name;
+	// }
 
 	public String getName() {
 		return name;
@@ -75,21 +78,33 @@ public class ClassInfo {
 	}
 
 	public MethodInfo getMethod(String methodName) {
-		return methods.get(methodName);
-	}
-
-	public boolean isVarDeclared(String variable) {
-		if (variables.exists(variable)) {
-			return true;
+		MethodInfo methodInfo = methods.get(methodName);
+		if (methodInfo != null) {
+			return methodInfo;
+		}
+		if (extendsInfo != null) {
+			return extendsInfo.getMethod(methodName);
 		}
 		else {
-			return false;
+			return null;
 		}
 	}
+
+	// public boolean isVarDeclared(String variable) {
+	// 	if (variables.exists(variable)) {
+	// 		return true;
+	// 	}
+	// 	else {
+	// 		return false;
+	// 	}
+	// }
 
 	public boolean isMethodDeclared(String methodName) {
 		if (methods.get(methodName) != null) {
 			return true;
+		}
+		if (extendsInfo != null) {
+			return extendsInfo.isMethodDeclared(methodName);
 		}
 		else {
 			return false;
@@ -122,6 +137,17 @@ public class ClassInfo {
 		}
 	}
 
+	public boolean equivalentType(String type) {
+		if (type == this.name) {
+			return true;
+		}
+		if (extendsInfo != null) {
+			return extendsInfo.equivalentType(type);
+		}
+		else {
+			return false;
+		}
+	}
 
 	public boolean methodExists(String methodName) {
 		if (methods.get(methodName) != null)
@@ -140,8 +166,19 @@ public class ClassInfo {
 
 	public boolean isOverridden(String methodName, MethodInfo methodInfo) {
 		MethodInfo otherMethodInfo = extendsInfo.getMethod(methodName);
-		return otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
-			otherMethodInfo.validArguments(getAsList(methodInfo.getParameters()));
+		if (otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
+				otherMethodInfo.exactValidArguments(getAsList(methodInfo.getParameters()))) {
+			return true;
+		}
+		if (extendsInfo == null) {
+			return false;
+		}
+		if (extendsInfo.methodExists(methodName)) {
+			return extendsInfo.isOverridden(methodName, methodInfo);
+		}
+		else {
+			return false;
+		}
 	}
 
 	public ArrayList<ExpressionInfo> getAsList(Variables vars) {
@@ -153,7 +190,6 @@ public class ClassInfo {
 	}
 
 	public void print() {
-		System.out.println((!extendsName.equals("") ? " extends " + extendsName : ""));
 		if (variables != null && variables.getSize() != 0) {
 			System.out.print("fields: ");
 			variables.print();	
