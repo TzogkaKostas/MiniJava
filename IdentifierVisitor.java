@@ -49,7 +49,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		variables.insert(argsName, "String[]");
 		n.f14.accept(this, variables);
 		
-		ClassInfo classInfo = new ClassInfo(className, "main", new MethodInfo("void", variables));
+		ClassInfo classInfo = new ClassInfo(className, "main", new MethodInfo("main", "void", variables));
 		symbolTable.insertClass(className, classInfo);
 		return className;
 	}
@@ -64,6 +64,9 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(ClassDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
+		if (symbolTable.classExists(className)) {
+			throw new RuntimeException("Class " + className + " already exists");
+		}
 
 		Variables variables = new Variables();
 		n.f3.accept(this, variables);
@@ -71,9 +74,6 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		ClassInfo classInfo = new ClassInfo(className, variables);
 		n.f4.accept(this, classInfo);
 
-		if (symbolTable.classExists(className) && !className.equals("main")) {
-			throw new RuntimeException("Class " + className + " already exists");
-		}
 		symbolTable.insertClass(className, classInfo);
 		return null;
 	}
@@ -90,6 +90,10 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	*/
 	public Object visit(ClassExtendsDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
+		
+		if (symbolTable.classExists(className)){
+			throw new RuntimeException("Class " + className + " already exists");
+		}
 
 		Variables variables = new Variables();
 		n.f5.accept(this, variables);
@@ -103,9 +107,6 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 
 		n.f6.accept(this, classInfo);
 
-		if (symbolTable.classExists(className) && !className.equals("main")){
-			throw new RuntimeException("Class " + className + " already exists");
-		}
 		symbolTable.insertClass(className, classInfo);
 		return null;
 	}
@@ -130,7 +131,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String returnType = (String) n.f1.accept(this, argu);
 		String methodName = (String) n.f2.accept(this, argu);
 
-		MethodInfo methodInfo = new MethodInfo(returnType);
+		MethodInfo methodInfo = new MethodInfo(methodName, returnType);
 
 		Variables allVariables = new Variables();
 		n.f4.accept(this, allVariables);
@@ -138,7 +139,8 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		n.f7.accept(this, allVariables);
 		methodInfo.setAllVariables(allVariables);
 
-		if (!classInfo.validDeclaration(methodName, methodInfo)) {
+		int rv = classInfo.validDeclaration(methodInfo);
+		if (rv == 0) {
 			throw new RuntimeException("Invalid declaration of method " + methodName);
 		}
 		classInfo.insertMethod(methodName, methodInfo);

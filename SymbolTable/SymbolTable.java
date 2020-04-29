@@ -57,9 +57,6 @@ public class SymbolTable {
 	public boolean validMethodArgs(SymbolTable symbolTable, String className, String methodName,
 			ArrayList<ExpressionInfo> args) {		
 		MethodInfo methodInfo = getClassInfo(className).getMethod(methodName);
-		if (methodInfo == null) {
-			methodInfo = getClassInfo(className).getExtendsInfo().getMethod(methodName);
-		}
 		return methodInfo.validArguments(symbolTable, args);
 	}
 

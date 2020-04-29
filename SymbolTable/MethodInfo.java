@@ -3,17 +3,24 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class MethodInfo {
+	String name;
 	String returnType;
 	Variables allVariables;
 	Variables parameters;
 
-	public MethodInfo(String returnType) {
+	public MethodInfo(String name, String returnType) {
+		this.name = name;
 		this.returnType = returnType;
 	}
 
-	public MethodInfo(String returnType, Variables allVariables) {
+	public MethodInfo(String name, String returnType, Variables allVariables) {
+		this.name = name;
 		this.returnType = returnType;
 		this.allVariables = allVariables;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public void insertVariable(String name, String type) {

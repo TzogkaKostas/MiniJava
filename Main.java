@@ -26,8 +26,9 @@ class Main {
 
 			CheckingVisitor checkingVisitor = new CheckingVisitor(symbolTable);
 			root.accept(checkingVisitor, null);
-			System.err.println(fileName + " is semantically correct.\n");
-			checkingVisitor.getOffsetTable().print();			
+			System.out.println(fileName + " is semantically correct.");
+
+			checkingVisitor.getOffsetTable().print();
 		}
 		catch (RuntimeException e) {
 			System.out.println(fileName + " error : " + e.getMessage() + "\n");

@@ -450,7 +450,6 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(MainClass n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
-		classInfo.setVarOffset(0);
 		
 		n.f15.accept(this, new StatementInfo(classInfo, "main"));
 		return null;
@@ -468,7 +467,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
 
-		offsetTable.insertClass(className, classInfo);
+		offsetTable.insertClass(classInfo);
 
 		n.f4.accept(this, classInfo);
 		return null;
@@ -488,7 +487,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
 
-		offsetTable.insertClass(className, classInfo);
+		offsetTable.insertClass(classInfo);
 		
 		n.f6.accept(this, classInfo);
 		return null;

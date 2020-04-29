@@ -10,13 +10,15 @@ public class ClassInfo {
 	Variables variables;
 	LinkedHashMap<String, MethodInfo> methods;
 	Integer varOffset;
-	Integer methodsSize;
+	Integer methodOffset;
 
 	public ClassInfo(String name, Variables variables) {
 		this.name = name;
 		this.extendsName = "";
 		this.variables = variables;
 		this.methods = new LinkedHashMap<>();
+		this.varOffset = 0;
+		this.methodOffset = 0;
 	}
 
 	public ClassInfo(String name, String extendsName, ClassInfo extendsInfo, Variables variables) {
@@ -25,6 +27,8 @@ public class ClassInfo {
 		this.extendsInfo = extendsInfo;
 		this.variables = variables;
 		this.methods = new LinkedHashMap<>();
+		this.varOffset = 0;
+		this.methodOffset = 0;
 	}
 
 	public ClassInfo(String name, String methodName, MethodInfo methodInfo) {
@@ -33,6 +37,8 @@ public class ClassInfo {
 		this.variables = new Variables();
 		this.methods = new LinkedHashMap<>();
 		this.methods.put(methodName, methodInfo);
+		this.varOffset = 0;
+		this.methodOffset = 0;
 	}
 
 	public void insertVariable(String identifier, String type) {
@@ -74,6 +80,10 @@ public class ClassInfo {
 	public void setVarOffset(Integer varOffset) {
 		this.varOffset = varOffset;
 	}	
+	
+	public void setMethodOffset(Integer methodOffset) {
+		this.methodOffset = methodOffset;
+	}	
 
 	public LinkedHashMap<String,MethodInfo> getMethods() {
 		return this.methods;
@@ -101,7 +111,7 @@ public class ClassInfo {
 	}
 
 	public Integer getMethodOffset() {
-		return this.methodsSize;
+		return this.methodOffset;
 	}
 
 	public boolean isMethodDeclared(String methodName) {
@@ -127,18 +137,19 @@ public class ClassInfo {
 		return null;
 	}
 
-	public boolean validDeclaration(String methodName, MethodInfo methodInfo) {
-		if (methodExists(methodName)) {
-			return false;
+	public Integer validDeclaration(MethodInfo methodInfo) {
+		if (methodExists(methodInfo.getName())) {
+			return 0;
 		}
 		if (extendsInfo == null) {
-			return true;
+			return 1;
 		}
-		if (extendsInfo.methodExists(methodName)) {
-			return extendsInfo.isOverridden(methodName, methodInfo);
+		MethodInfo otherMethodInfo = extendsInfo.getMethod(methodInfo.getName());
+		if(otherMethodInfo != null) {
+			return equalMethod(otherMethodInfo, methodInfo) ? 2 : 0;
 		}
 		else {
-			return true;
+			return 1;
 		}
 	}
 
@@ -161,29 +172,17 @@ public class ClassInfo {
 			return false;
 	}
 
-	// public boolean isOverload(String methodName, MethodInfo methodInfo) {
-	// 	MethodInfo otherMethodInfo = methods.get(methodName);
-	// 	if (otherMethodInfo == null) {
-	// 		return false;
-	// 	}
-	// 	return !otherMethodInfo.validArguments(getAsList(methodInfo.getParameters()));
-	// }
+	public Boolean isOverridden(MethodInfo methodInfo) {
+		MethodInfo otherMethodInfo = getMethod(methodInfo.getName());
+		if (otherMethodInfo != null) {
+			return equalMethod(otherMethodInfo, methodInfo);
+		}
+		return extendsInfo.isOverridden(methodInfo);
+	}
 
-	public boolean isOverridden(String methodName, MethodInfo methodInfo) {
-		MethodInfo otherMethodInfo = getMethod(methodName);
-		if (otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
-				otherMethodInfo.exactValidArguments(getAsList(methodInfo.getParameters()))) {
-			return true;
-		}
-		if (extendsInfo == null) {
-			return false;
-		}
-		if (extendsInfo.methodExists(methodName)) {
-			return extendsInfo.isOverridden(methodName, methodInfo);
-		}
-		else {
-			return false;
-		}
+	public boolean equalMethod(MethodInfo otherMethodInfo, MethodInfo methodInfo) {
+		return otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
+				otherMethodInfo.exactValidArguments(getAsList(methodInfo.getParameters()));
 	}
 
 	public ArrayList<ExpressionInfo> getAsList(Variables vars) {
