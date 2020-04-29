@@ -1,6 +1,7 @@
 import syntaxtree.*;
 import visitor.GJDepthFirst;
-import SymbolTable.*;
+import Types.*;
+
 
 public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	SymbolTable symbolTable = new SymbolTable();

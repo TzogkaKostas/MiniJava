@@ -1,6 +1,6 @@
 import syntaxtree.*;
 import visitor.GJDepthFirst;
-import SymbolTable.*;
+import Types.*;
 import java.util.*;
 
 public class CheckingVisitor extends GJDepthFirst <Object, Object> {

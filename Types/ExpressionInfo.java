@@ -1,4 +1,4 @@
-package SymbolTable;
+package Types;
 
 public class ExpressionInfo {
 	String id;

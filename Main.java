@@ -1,6 +1,7 @@
 import syntaxtree.*;
 import java.io.*;
-import SymbolTable.*;
+import Types.*;
+
 
 class Main {
     public static void main (String [] args){

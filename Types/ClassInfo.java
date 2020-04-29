@@ -1,4 +1,4 @@
-package SymbolTable;
+package Types;
 import java.util.LinkedHashMap;
 import java.util.*;
 import java.util.Map.Entry;

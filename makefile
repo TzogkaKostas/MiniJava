@@ -1,12 +1,12 @@
-all: main SymbolTable CheckingVisitor IdentifierVisitor
+all: main Types CheckingVisitor IdentifierVisitor
 
 main: Main.java
 	javac Main.java
 
-SymbolTable: SymbolTable/SymbolTable.java SymbolTable/ClassInfo.java SymbolTable/MethodInfo.java \
-		SymbolTable/Variables.java SymbolTable/StatementInfo.java SymbolTable/ExpressionInfo.java \
-		SymbolTable/OffsetTable.java
-	javac SymbolTable/*.java
+Types: Types/SymbolTable.java Types/ClassInfo.java Types/MethodInfo.java \
+		Types/Variables.java Types/StatementInfo.java Types/ExpressionInfo.java \
+		Types/OffsetTable.java
+	javac Types/*.java
 
 CheckingVisitor: CheckingVisitor.java
 	javac CheckingVisitor.java
@@ -15,4 +15,4 @@ IdentifierVisitor: IdentifierVisitor.java
 	javac IdentifierVisitor.java
 
 clean:
-	rm -f *.class *~ SymbolTable/*.class
+	rm -f *.class *~ Types/*.class
