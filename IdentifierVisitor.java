@@ -66,7 +66,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 	public Object visit(ClassDeclaration n, Object argu) {
 		String className = (String) n.f1.accept(this, argu);
 		if (symbolTable.classExists(className)) {
-			throw new RuntimeException("Class " + className + " already exists");
+			throw new RuntimeException("duplicate class: " + className );
 		}
 
 		Variables variables = new Variables();
@@ -93,7 +93,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String className = (String) n.f1.accept(this, argu);
 		
 		if (symbolTable.classExists(className)){
-			throw new RuntimeException("Class " + className + " already exists");
+			throw new RuntimeException("duplicate class: " + className );
 		}
 
 		Variables variables = new Variables();
@@ -102,7 +102,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String extendsName = (String) n.f3.accept(this, argu);
 		ClassInfo extendsClass = symbolTable.getClassInfo(extendsName);
 		if (extendsClass == null) {
-			throw new RuntimeException("Extending Class " + extendsClass + " is not declared");
+			throw new RuntimeException("Base Class " + extendsClass + " is not declared");
 		}
 		ClassInfo classInfo = new ClassInfo(className, extendsName, extendsClass, variables);
 
@@ -140,8 +140,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		n.f7.accept(this, allVariables);
 		methodInfo.setAllVariables(allVariables);
 
-		int rv = classInfo.validDeclaration(methodInfo);
-		if (rv == 0) {
+		if (classInfo.validDeclaration(methodInfo) == 0) {
 			throw new RuntimeException("Invalid declaration of method " + methodName);
 		}
 		classInfo.insertMethod(methodName, methodInfo);
@@ -157,7 +156,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String[] strArray = (String[]) n.f0.accept(this, argu);
 
 		if (variables.exists(strArray[1])) {
-			throw new RuntimeException("Variable " + strArray[1] + " already exists");
+			throw new RuntimeException("Variable " + strArray[1] + " is already defined");
 		}
 		variables.insert(strArray[1], strArray[0]);
 
@@ -185,7 +184,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String[] strArray = (String[]) n.f1.accept(this, argu);
 
 		if (variables.exists(strArray[1])) {
-			throw new RuntimeException("Variable " + strArray[1] + " already exists");
+			throw new RuntimeException("Variable " + strArray[1] + " is already defined");
 		}
 		variables.insert(strArray[1], strArray[0]);
 		return null;
@@ -202,7 +201,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		String id = (String) n.f1.accept(this, null);
 
 		if (variables.exists(id)) {
-			throw new RuntimeException("Variable " + id + " already exists");
+			throw new RuntimeException("Variable " + id + " is already defined");
 		}
 		variables.insert(id, type);
 		return null;

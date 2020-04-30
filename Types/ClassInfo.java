@@ -172,6 +172,18 @@ public class ClassInfo {
 			return false;
 	}
 
+	public boolean classExtends(String superclass) {
+		if (extendsInfo == null) {
+			return false;
+		}
+		if (extendsInfo.getName().equals(superclass)){
+			return true;
+		}
+		else {
+			return extendsInfo.classExtends(superclass);
+		}
+	}
+
 	public Boolean isOverridden(MethodInfo methodInfo) {
 		MethodInfo otherMethodInfo = getMethod(methodInfo.getName());
 		if (otherMethodInfo != null) {

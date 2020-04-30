@@ -1,16 +1,34 @@
 class Factorial{
-    public static void main(String[] a){
-        System.out.println(new Fac().ComputeFac(10));
+    public static void main(String[] args){
     }
 }
 
-class Fac {
-    public int ComputeFac(int num){  //TE
-        int num_aux ;
-        if (num < 1)
-            num_aux = 1 ;
-        else
-            num_aux = num * (this.ComputeFac(num-1)) ;
-        return num_aux ;
+class A {
+    int y;
+    public int get(int x, boolean y) {
+        int[] arr;
+        A a;
+        a = new D();
+        x = 1 * (       (new D()).get22(a, new M())          );
+
+        return 1;
     }
+}
+
+class B extends A {
+
+}
+
+class C extends B {
+
+}
+
+class D extends C {
+    public int get22(A a, M m) {
+        return 1;
+    }
+}
+
+class M {
+
 }

@@ -42,12 +42,12 @@ public class SymbolTable {
 			return false;
 	}
 
-	public boolean classExtends(String base, String derived) {
-		ClassInfo classInfo = classes.get(derived);
+	public boolean classExtends(String subclass, String superclass) {
+		ClassInfo classInfo = classes.get(subclass);
 		if (classInfo == null) {
 			return false;
 		}
-		return classInfo.getExtendedName().equals(base); 
+		return classInfo.classExtends(superclass);
 	}
 
 	public boolean classHasMethod(String className, String methodName) {

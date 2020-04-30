@@ -47,9 +47,9 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
 		if (!type.equals(exprInfo.getType()) && 
-				!symbolTable.classExtends(type, exprInfo.getType())) {	
-			throw new RuntimeException(type + "(" + identifier + ")"
-				+ " = " + exprInfo.getType());
+				!symbolTable.classExtends(exprInfo.getType(), type)) {	
+			throw new RuntimeException(exprInfo.getType() + " cannot be converted to " +
+				type + "(" + identifier + ")");
 		}
 		return null;
 	}
@@ -75,18 +75,53 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
 		if (!exprInfo.getType().equals("int")) {
 			throw new RuntimeException(exprInfo.getType() +
-				" can't be an index of " + identifier);
+				" can't be an index of " + identifier + " array");
 		}
 
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
 		if (!type.equals(exprInfo2.getType() + "[]")) {
-			throw new RuntimeException(type + "(" + identifier + ")"
-				+ " = " + exprInfo2.getType());	
+			throw new RuntimeException("Invalid ArrayAssignmentStatement");
 		}
 		return null;
 	}
 
-	
+	/**
+	* f0 -> "if"
+	* f1 -> "("
+	* f2 -> Expression()
+	* f3 -> ")"
+	* f4 -> Statement()
+	* f5 -> "else"
+	* f6 -> Statement()
+	*/
+	public Object visit(IfStatement n, Object argu) {
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
+		if (exprInfo.getType() != "boolean") {
+			throw new RuntimeException(exprInfo.getType() + 
+				" cannot be converted to boolean in IfStatement");		
+		}
+		n.f4.accept(this, argu);
+		n.f6.accept(this, argu);
+		return null;
+	}
+
+   	/**
+	* f0 -> "while"
+	* f1 -> "("
+	* f2 -> Expression()
+	* f3 -> ")"
+	* f4 -> Statement()
+	*/
+	public Object visit(WhileStatement n, Object argu) {
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
+		if (exprInfo.getType() != "boolean") {
+			throw new RuntimeException(exprInfo.getType() + 
+				" cannot be converted to boolean in WhileStatement");		
+		}
+		n.f4.accept(this, argu);
+		return null;
+	}
+
    	/**
 	* f0 -> "System.out.println"
 	* f1 -> "("
@@ -217,7 +252,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		if (!exprInfo.getType().contains("[]")) {
 			throw new RuntimeException(exprInfo.toString() +
-				": length is only valid for array");
+				": length is only valid for arrays");
 		}
 		return new ExpressionInfo("", "int", "");
 	 }
@@ -236,7 +271,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		String identifier = (String) n.f2.accept(this, argu);
 		if (exprInfo.getType().contains("int") || exprInfo.getType().contains("boolean") ) {
-			throw new RuntimeException("dot (.) operator can't be on " +
+			throw new RuntimeException("dot (.) operator can't used be on " +
 				exprInfo.getType());
 		}
 		if (!symbolTable.classHasMethod(exprInfo.getType(), identifier)) {
@@ -257,7 +292,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		return new ExpressionInfo("", 
 			symbolTable.getMethodReturnedType(exprInfo.getType(), identifier), "");
-	 }
+	}
   
 	/**
 	  * f0 -> Expression()
@@ -304,7 +339,11 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	* f1 -> Clause()
 	*/
 	public Object visit(NotExpression n, Object argu) {
-		return n.f1.accept(this, argu);
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f1.accept(this, argu);
+		if (!exprInfo.getType().equals("boolean")) {
+			throw new RuntimeException("!" + exprInfo.getType());
+		}
+		return exprInfo;
    }
   
 	/**
@@ -451,6 +490,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
 		
+		n.f14.accept(this, null);
+
 		n.f15.accept(this, new StatementInfo(classInfo, "main"));
 		return null;
 	}
@@ -469,6 +510,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		offsetTable.insertClass(classInfo);
 
+		n.f3.accept(this, null);
 		n.f4.accept(this, classInfo);
 		return null;
 	}
@@ -489,6 +531,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		offsetTable.insertClass(classInfo);
 		
+		n.f5.accept(this, null);
 		n.f6.accept(this, classInfo);
 		return null;
 	}
@@ -513,11 +556,14 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 		String type = (String) n.f1.accept(this, argu);
 		String methodName = (String) n.f2.accept(this, argu);
 		
+		n.f7.accept(this, null);
+
 		StatementInfo statementInfo = new StatementInfo(classInfo, methodName);
 		n.f8.accept(this, statementInfo);
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f10.accept(this, statementInfo);
-		if (!type.equals(exprInfo.getType())) {
+		if (!type.equals(exprInfo.getType()) && 
+			!symbolTable.classExtends(exprInfo.getType(), type)) {
 			throw new RuntimeException("method " + methodName + " must return " + type + ", not " + 
 				exprInfo.getType());
 		}
@@ -565,18 +611,19 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	// 	return null;
 	// }
 
-	// /**
-	// * f0 -> Type()
-	// * f1 -> Identifier()
-	// * f2 -> ";"
-	// */
-	// public Object visit(VarDeclaration n, Object argu) {
-	// 	Identifiers identifiers = (Identifiers) argu;
-	// 	String type = (String) n.f0.accept(this, null);
-	// 	String id = (String) n.f1.accept(this, null);
-	// 	identifiers.insert(id, type);
-	// 	return null;
-	//  }
+	/**
+	* f0 -> Type()
+	* f1 -> Identifier()
+	* f2 -> ";"
+	*/
+	public Object visit(VarDeclaration n, Object argu) {
+		String type = (String) n.f0.accept(this, null);
+		if (!type.equals("int") && !type.equals("int[]") && !type.equals("boolean") &&
+			!type.equals("boolean[]") && !symbolTable.classExists(type)) {
+				throw new RuntimeException("Type " + type + " doesn't exist.");
+		}
+		return null;
+	 }
 
 	/**
     * f0 -> <IDENTIFIER>
