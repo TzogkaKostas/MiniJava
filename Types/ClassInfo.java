@@ -154,7 +154,7 @@ public class ClassInfo {
 	}
 
 	public boolean equivalentType(String type) {
-		if (type == this.name) {
+		if (type.equals(this.name)) {
 			return true;
 		}
 		if (extendsInfo != null) {
@@ -193,7 +193,7 @@ public class ClassInfo {
 	}
 
 	public boolean equalMethod(MethodInfo otherMethodInfo, MethodInfo methodInfo) {
-		return otherMethodInfo.getReturnType() == methodInfo.getReturnType() &&
+		return otherMethodInfo.getReturnType().equals(methodInfo.getReturnType()) &&
 				otherMethodInfo.exactValidArguments(getAsList(methodInfo.getParameters()));
 	}
 

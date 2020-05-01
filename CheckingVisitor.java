@@ -96,7 +96,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	*/
 	public Object visit(IfStatement n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
-		if (exprInfo.getType() != "boolean") {
+		if (!exprInfo.getType().equals("boolean")) {
 			throw new RuntimeException(exprInfo.getType() + 
 				" cannot be converted to boolean in IfStatement");		
 		}
@@ -114,7 +114,7 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	*/
 	public Object visit(WhileStatement n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
-		if (exprInfo.getType() != "boolean") {
+		if (!exprInfo.getType().equals("boolean")) {
 			throw new RuntimeException(exprInfo.getType() + 
 				" cannot be converted to boolean in WhileStatement");		
 		}
@@ -227,9 +227,6 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 	*/
 	public Object visit(ArrayLookup n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
-		if (exprInfo.getId().equals("")) {
-			throw new RuntimeException("Id or new is only allowed before []");
-		}
 		if (!exprInfo.getType().contains("[]")) {
 			throw new RuntimeException(exprInfo.getId() + " is not an array");
 		}

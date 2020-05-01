@@ -132,10 +132,10 @@ public class OffsetTable {
 
 	
 	public Integer sizeOf(String type) {
-		if (type == "int") {
+		if (type.equals("int")) {
 			return 4;
 		}
-		else if (type == "boolean") {
+		else if (type.equals("boolean")) {
 			return 1;
 		}
 		else {
