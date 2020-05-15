@@ -1,7 +1,11 @@
-import syntaxtree.*;
-import java.io.*;
-import Types.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 
+import Types.OffsetTable;
+import Types.SymbolTable;
+import syntaxtree.Goal;
 
 class Main {
     public static void main (String [] args){
@@ -10,12 +14,15 @@ class Main {
 			System.exit(1);
 		}
 		for (String arg : args) {
-			semanticAnalysis(arg);
+			CheckingVisitor checkingVisitor = semanticAnalysis(arg);
+			generateIR(arg, checkingVisitor.getSymbolTable(),
+					checkingVisitor.getOffsetTable());
 		}
 	}
 
-	public static void semanticAnalysis(String fileName) {
+	public static CheckingVisitor semanticAnalysis(String fileName) {
 		FileInputStream fis = null;
+		CheckingVisitor checkingVisitor = null;
 		try{
 			fis = new FileInputStream(fileName);
 			MiniJavaParser parser = new MiniJavaParser(fis);
@@ -25,9 +32,9 @@ class Main {
 			root.accept(idVisitor, null);
 			SymbolTable symbolTable = idVisitor.getSymbolTable();
 
-			CheckingVisitor checkingVisitor = new CheckingVisitor(symbolTable);
+			checkingVisitor = new CheckingVisitor(symbolTable);
 			root.accept(checkingVisitor, null);
-			System.out.println(fileName + " is semantically correct.");
+			// System.out.println(fileName + " is semantically correct.");
 
 			checkingVisitor.getOffsetTable().print();
 		}
@@ -48,5 +55,39 @@ class Main {
 				System.err.println(ex.getMessage());
 			}
 		}
+		return checkingVisitor;
+	}
+
+	public static void generateIR(String fileName, SymbolTable symbolTable,
+			OffsetTable offsetTable) {
+		FileInputStream fis = null;
+		FileWriter fileWriter = null;
+		try{
+			fis = new FileInputStream(fileName);
+			MiniJavaParser parser = new MiniJavaParser(fis);
+			Goal root = parser.Goal();
+
+    		fileWriter = new FileWriter(getBaseName(fileName) + ".ll");
+			GenerationVisitor generationVisitor = new GenerationVisitor(symbolTable, offsetTable, fileWriter);
+			root.accept(generationVisitor, null);
+		} catch (IOException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		} catch (ParseException ex) {
+			System.out.println(ex.getMessage());
+		} finally {
+			try {
+				if (fis != null)
+					fis.close();
+				if (fileWriter != null)
+					fileWriter.close();
+			} catch (IOException ex) {
+				System.err.println(ex.getMessage());
+			}
+		}
+	}
+
+	public static String getBaseName(String path) {
+		return path.substring(0, path.lastIndexOf('.'));
 	}
 }

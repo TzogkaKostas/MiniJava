@@ -1,4 +1,4 @@
-all: main Types CheckingVisitor IdentifierVisitor
+all: main Types CheckingVisitor IdentifierVisitor GenerationVisitor
 
 main: Main.java
 	javac Main.java
@@ -13,6 +13,9 @@ CheckingVisitor: CheckingVisitor.java
 
 IdentifierVisitor: IdentifierVisitor.java
 	javac IdentifierVisitor.java
+
+GenerationVisitor: GenerationVisitor.java
+	javac GenerationVisitor.java
 
 clean:
 	rm -f *.class *~ Types/*.class
