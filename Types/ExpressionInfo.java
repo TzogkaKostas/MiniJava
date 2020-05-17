@@ -13,6 +13,12 @@ public class ExpressionInfo {
 		this.result = result;
 	}
 
+	public ExpressionInfo(String id, String type, String value) {
+		this.id = id;
+		this.type = type;
+		this.value = value;
+	}
+
 	public String getType() {
 		return this.type;
 	}

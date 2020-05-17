@@ -51,6 +51,10 @@ public class MethodInfo {
 		return this.parameters;
 	}
 
+	public Collection<String> getParamNames() {
+		return this.parameters.getVariables().values();
+	}
+
 	public void setAllVariables(Variables allVariables) {
 		this.allVariables = allVariables;
 	}

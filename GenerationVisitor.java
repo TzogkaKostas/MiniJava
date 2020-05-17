@@ -2,28 +2,26 @@ import syntaxtree.*;
 import visitor.GJDepthFirst;
 import Types.*;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
 import java.io.FileWriter;
 // import java.io.*;
 
-public class GenerationVisitor extends GJDepthFirst <Object, Object> {
+public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	SymbolTable symbolTable;
 	OffsetTable offsetTable;
 	FileWriter fileWriter;
 	Map<String, String> types;
 	Integer regCount;
 	Integer labelCount;
-	
-	GenerationVisitor(SymbolTable symbolTable, OffsetTable offsetTable,
-			FileWriter fileWriter) {
+
+	GenerationVisitor(SymbolTable symbolTable, OffsetTable offsetTable, FileWriter fileWriter) {
 		this.symbolTable = symbolTable;
 		this.offsetTable = offsetTable;
 		this.fileWriter = fileWriter;
 		this.regCount = 0;
 		this.labelCount = 0;
-		this.types = Map.of("boolean[]", "i8*",
-				"boolean", "i8",
-				"int[]", "i32*",
-				"int", "i32");
+		this.types = Map.of("boolean[]", "i8*", "boolean", "i8", "int[]", "i32*", "int", "i32");
 	}
 
 	public SymbolTable getSymbolTable() {
@@ -34,14 +32,70 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 		return this.offsetTable;
 	}
 
-	public void emit(String code){
-		System.out.println(code);
+	public void emit(String code) {
+		System.out.print(code);
 
 		// try {
-		// 	fileWriter.write(code);
+		// fileWriter.write(code);
 		// } catch (IOException e) {
-		// 	System.out.println(" Eroor: " + code);
+		// System.out.println(" Eroor: " + code);
 		// }
+	}
+
+	public void emitGeneralFunctions() {
+		emit("declare i8* @calloc(i32, i32)\n");
+		emit("declare i32 @printf(i8*, ...)\n");
+		emit("declare void @exit(i32)\n\n");
+		emit("@_cint = constant [4 x i8] c\"%d\0a\00\"\n");
+		emit("@_cOOB = constant [15 x i8] c\"Out of bounds\0a\00\"\n");
+		emit("@_cNSZ = constant [15 x i8] c\"Negative size\0a\00\"\n\n");
+		emit("define void @print_int(i32 %i) {\n");
+		emit("\t%_str = bitcast [4 x i8]* @_cint to i8*\n");
+		emit("\tcall i32 (i8*, ...) @printf(i8* %_str, i32 %i)\n");
+		emit("\tret void\n");
+		emit("}\n\n");
+		emit("define void @throw_oob() {\n");
+		emit("\t%_str = bitcast [15 x i8]* @_cOOB to i8*\n");
+		emit("\tcall i32 (i8*, ...) @printf(i8* %_str)\n");
+		emit("\tcall void @exit(i32 1)\n");
+		emit("\tret void\n");
+		emit("}\n\n");
+		emit("define void @throw_nsz() {\n");
+		emit("\t%_str = bitcast [15 x i8]* @_cNSZ to i8*\n");
+		emit("\tcall i32 (i8*, ...) @printf(i8* %_str)\n");
+		emit("\tcall void @exit(i32 1)\n");
+		emit("\tret void\n");
+		emit("}\n\n");
+	}
+
+	public void emitVTables() {
+		for (ClassInfo classInfo : symbolTable.getClasses()) {
+			if (classInfo.getName() != symbolTable.getMainClassName()) {
+				emit("@." + classInfo.getName() + "_vtable = global [" + 
+						classInfo.getNumOfMethods().toString() + " x i8*] [\n");
+				emitVTable(classInfo);
+			}
+			else {
+				emit("@." + classInfo.getName() + "_vtable = global [0 x i8*] [");
+			}
+			emit("]\n\n");
+		}
+	}
+
+	public void emitVTable(ClassInfo classInfo) {
+		Integer i = 0;
+		for (MethodInfo methodInfo : classInfo.getMethods().values()) {
+			String entry = "\ti8* bitcast (" + getIRType(methodInfo.getReturnType()) + 
+					" " + getIRTypes(methodInfo.getParamNames()) + "* @" + 
+					classInfo.getName() + "." + methodInfo.getName() + " to i8*)";
+			if (i != classInfo.getNumOfMethods() - 1) {
+				emit(entry + ",\n");
+			}
+			else {
+				emit(entry + "\n");
+			}
+			i += 1;	
+		}
 	}
 
 	public void nextReg() {
@@ -67,9 +121,21 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 
 	String getIRType(String type) {
 		String t = types.get(type);
-		return t == null ? "i8" : t;
+		return t == null ? "i8*" : t;
 	}
 
+	String getIRTypes(Collection<String> types) {
+		String IRtypes = "(i8*";
+		for (String type : types) {
+			IRtypes += ", " + getIRType(type);
+		}
+		return IRtypes + ")";
+	}
+
+	String removeLastComma(String str) {
+		System.out.println("#"+str+"#");
+		return str.substring(0, str.lastIndexOf(","));
+	}
 
    	/**
 	* f0 -> Identifier()
@@ -84,8 +150,8 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
 
-		emit("store " + getIRType(type) + " " + exprInfo.getResult() + ", " + 
-				getIRType(type) + "* " + identifier + "\n");
+		emit("\tstore " + getIRType(type) + " " + exprInfo.getResult() + ", " + 
+				getIRType(type) + "* %" + identifier + "\n");
 
 		return null;
 	}
@@ -438,8 +504,8 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 			String type = statementInfo.getType(variable);
 
 			String result = newTemp();
-			emit(result + " = load " + getIRType(type) + ", " + getIRType(type) + "*" +
-					variable);
+			emit("\t" + result + " = load " + getIRType(type) + ", " +
+					getIRType(type) + "* %" + variable + "\n");
 			return new ExpressionInfo(variable, type, "", result);
 		}
 		else if (n.f0.which == 4) {
@@ -541,38 +607,17 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	* f17 -> "}"
 	*/
 	public Object visit(MainClass n, Object argu) {
-		emit("declare i8* @calloc(i32, i32)\n" +
-			"declare i32 @printf(i8*, ...)\n" +
-		 	"declare void @exit(i32)\n" +
-			"@_cint = constant [4 x i8] c\"%d\0a\00\"\n" +
-			"@_cOOB = constant [15 x i8] c\"Out of bounds\0a\00\"\n" +
-			"@_cNSZ = constant [15 x i8] c\"Negative size\0a\00\"\n" +
-		
-			"define void @print_int(i32 %i) {\n" +
-				"%_str = bitcast [4 x i8]* @_cint to i8*\n" +
-				"call i32 (i8*, ...) @printf(i8* %_str, i32 %i)\n" +
-				"ret void\n" +
-			"}\n" +
-			"define void @throw_oob() {\n" +
-				"%_str = bitcast [15 x i8]* @_cOOB to i8*\n" +
-				"call i32 (i8*, ...) @printf(i8* %_str)\n" +
-				"call void @exit(i32 1)\n" +
-				"ret void\n" +
-			"}\n" +
-			"define void @throw_nsz() {\n" +
-				"%_str = bitcast [15 x i8]* @_cNSZ to i8*\n" +
-				"call i32 (i8*, ...) @printf(i8* %_str)\n" +
-				"call void @exit(i32 1)\n" +
-				"ret void\n" +
-			"}\n"
-		);
+		emitVTables();
+		emitGeneralFunctions();
 
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
 		
+		emit("define i32 @main() {\n");
 		n.f14.accept(this, null);
 
 		n.f15.accept(this, new StatementInfo(classInfo, "main"));
+		emit("}\n\n");
 		return null;
 	}
 
@@ -657,8 +702,8 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	*/
 	public Object visit(VarDeclaration n, Object argu) {
 		String type = (String) n.f0.accept(this, null);
-		String identifier = (String) n.f0.accept(this, null);
-		emit("%" + identifier + " = alloca " + getIRType(type));
+		String identifier = (String) n.f1.accept(this, null);
+		emit("\t%" + identifier + " = alloca " + getIRType(type) + "\n");
 		return null;
 	 }
 

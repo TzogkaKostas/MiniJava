@@ -36,7 +36,7 @@ class Main {
 			root.accept(checkingVisitor, null);
 			// System.out.println(fileName + " is semantically correct.");
 
-			checkingVisitor.getOffsetTable().print();
+			// checkingVisitor.getOffsetTable().print();
 		}
 		catch (RuntimeException e) {
 			System.out.println(fileName + " error : " + e.getMessage() + "\n");

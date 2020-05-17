@@ -52,6 +52,7 @@ public class IdentifierVisitor extends GJDepthFirst <Object, Object>{
 		
 		ClassInfo classInfo = new ClassInfo(className, "main", new MethodInfo("main", "void", variables));
 		symbolTable.insertClass(className, classInfo);
+		symbolTable.setMainClassName(className);
 		return className;
 	}
 

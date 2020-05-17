@@ -1,6 +1,7 @@
 package Types;
-import java.util.LinkedHashMap;
+
 import java.util.*;
+import java.util.Map.Entry;
 
 public class SymbolTable {
 	String mainClassName;
@@ -9,7 +10,7 @@ public class SymbolTable {
 	public SymbolTable() {
 		classes = new LinkedHashMap<>();
 	}
-	
+
 	public void insertClass(String name, ClassInfo classInfo) {
 		classes.put(name, classInfo);
 	}
@@ -55,7 +56,7 @@ public class SymbolTable {
 	}
 
 	public boolean validMethodArgs(SymbolTable symbolTable, String className, String methodName,
-			ArrayList<ExpressionInfo> args) {		
+			ArrayList<ExpressionInfo> args) {
 		MethodInfo methodInfo = getClassInfo(className).getMethod(methodName);
 		return methodInfo.validArguments(symbolTable, args);
 	}
@@ -66,6 +67,10 @@ public class SymbolTable {
 			methodInfo = getClassInfo(className).getExtendsInfo().getMethod(methodName);
 		}
 		return methodInfo.getReturnType();
+	}
+
+	public Collection<ClassInfo> getClasses() {
+		return classes.values();
 	}
 
 	public void print() {

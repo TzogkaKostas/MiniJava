@@ -85,7 +85,7 @@ public class ClassInfo {
 		this.methodOffset = methodOffset;
 	}	
 
-	public LinkedHashMap<String,MethodInfo> getMethods() {
+	public LinkedHashMap<String, MethodInfo> getMethods() {
 		return this.methods;
 	}
 
@@ -203,6 +203,16 @@ public class ClassInfo {
 			args.add(new ExpressionInfo("", entry.getValue(), ""));
 		}
 		return args;
+	}
+
+	public Integer getNumOfMethods() {
+		Integer numOfMethods = methods.size();
+		if (extendsInfo == null) {
+			return numOfMethods;
+		}
+		else {
+			return numOfMethods + extendsInfo.getNumOfMethods();
+		}
 	}
 
 	public void print() {

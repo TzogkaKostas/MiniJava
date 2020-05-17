@@ -130,6 +130,9 @@ public class OffsetTable {
 		classInfo.setMethodOffset(methodOffset);
 	}
 
+	public void emitVTables() {
+		
+	}
 	
 	public Integer sizeOf(String type) {
 		if (type.equals("int")) {
