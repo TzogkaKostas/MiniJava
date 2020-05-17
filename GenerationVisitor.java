@@ -10,13 +10,17 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	OffsetTable offsetTable;
 	FileWriter fileWriter;
 	Map<String, String> types;
+	Integer regCount;
+	Integer labelCount;
 	
 	GenerationVisitor(SymbolTable symbolTable, OffsetTable offsetTable,
 			FileWriter fileWriter) {
 		this.symbolTable = symbolTable;
 		this.offsetTable = offsetTable;
 		this.fileWriter = fileWriter;
-		types = Map.of("boolean[]", "i8*",
+		this.regCount = 0;
+		this.labelCount = 0;
+		this.types = Map.of("boolean[]", "i8*",
 				"boolean", "i8",
 				"int[]", "i32*",
 				"int", "i32");
@@ -30,18 +34,40 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 		return this.offsetTable;
 	}
 
-	public void emit(FileWriter fileWriter, String code){
+	public void emit(String code){
 		System.out.println(code);
 
-    	// try {
-    		// fileWriter.write(code);
-    	// } catch (IOException e) {
-    		// System.out.println(" Eroor: " + code);
-    	// }
+		// try {
+		// 	fileWriter.write(code);
+		// } catch (IOException e) {
+		// 	System.out.println(" Eroor: " + code);
+		// }
 	}
 
-	String getType(String type) {
-		return types.get(type);
+	public void nextReg() {
+		this.regCount += 1;
+	}
+
+	public String newTemp() {
+		String r = "%_" + Integer.toString(10, this.regCount);;
+		nextReg();
+		return r;
+	}
+
+	public void nextLabel() {
+		this.regCount += 1;
+	}
+
+	public String newLabel() {
+		String r = "%L" + Integer.toString(10, this.regCount);;
+		nextReg();
+		return r;
+	}
+
+
+	String getIRType(String type) {
+		String t = types.get(type);
+		return t == null ? "i8" : t;
 	}
 
 
@@ -53,19 +79,14 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	*/
 	public Object visit(AssignmentStatement n, Object argu) {
 		StatementInfo statementInfo = (StatementInfo) argu;
-
 		String identifier = (String) n.f0.accept(this, statementInfo);
 		String type = statementInfo.getType(identifier);
-		if (type == null) {
-			throw new RuntimeException("Identifier " + identifier + " is not declared");
-		}		
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
-		if (!type.equals(exprInfo.getType()) && 
-				!symbolTable.classExtends(exprInfo.getType(), type)) {	
-			throw new RuntimeException(exprInfo.getType() + " cannot be converted to " +
-				type + "(" + identifier + ")");
-		}
+
+		emit("store " + getIRType(type) + " " + exprInfo.getResult() + ", " + 
+				getIRType(type) + "* " + identifier + "\n");
+
 		return null;
 	}
 
@@ -161,12 +182,19 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(AndExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().equals("boolean") ||
-				!exprInfo2.getType().equals("boolean")) {
-			throw new RuntimeException(exprInfo.getType() + " && " +
-				exprInfo2.getType());
-		}
-		return new ExpressionInfo("", "boolean", "");
+
+		String trueLabel = newLabel();
+		String falseLabel = newLabel();
+		String result = newTemp();
+		String t = newTemp();
+		emit(result + " = load i1, i1* " + exprInfo.getResult() + "\n");
+		emit(t + " = icmp eq i1 " + exprInfo.getResult() + ", 0\n");
+		emit("br i1 " + t + ", label " + trueLabel + ", label " + falseLabel + "\n");
+		emit(falseLabel + ":\n");
+		emit(result + " = load i1, i1* " + exprInfo2.getResult() + "\n");
+		emit(trueLabel + ":\n");
+
+		return new ExpressionInfo("", "boolean", "", result);
 	}
 
    	/**
@@ -177,13 +205,25 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(CompareExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().equals("int") ||
-				!exprInfo2.getType().equals("int")) {
-			throw new RuntimeException(exprInfo.getType() + " < " +
-				exprInfo2.getType());
-		}
 
-		return new ExpressionInfo("", "boolean", "");
+		String t = newTemp();
+		String result = newTemp();
+		String btrue = newLabel();
+		String bfalse = newLabel();
+		String end = newLabel();
+		
+		emit(t + " = icmp slt i32 " + exprInfo.getResult() + ", " +
+				exprInfo2.getResult() + "\n");
+		emit("br i1 " + t + ", label %btrue, label %bfalse\n" );
+		emit(btrue + ":\n");
+		emit("\t" + result + " = add i32 1, 0\n");
+		emit("\tbr label %end\n");
+		emit(bfalse + ":\n");
+		emit("\t" + result + " = add i32 0, 0\n");
+		emit("  br label %end\n");
+		emit(end + ":\n");
+
+		return new ExpressionInfo("", "boolean", "", result);
 	}
 
 	  /**
@@ -194,12 +234,11 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(PlusExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().equals("int") || !exprInfo2.getType().equals("int")) {
-			throw new RuntimeException(exprInfo.getType() + " + " +
-				exprInfo2.getType());
-		}
 
-		return new ExpressionInfo("", "int", "");
+		String result = newTemp();
+		emit(result + " = " + " add i32 " + exprInfo.getResult() + " " + exprInfo2.getResult());
+
+		return new ExpressionInfo("", "int", "", result);
 	 }
   
 	 /**
@@ -210,12 +249,11 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	 public Object visit(MinusExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().equals("int") || !exprInfo2.getType().equals("int")) {
-			throw new RuntimeException(exprInfo.getType() + " - " +
-				exprInfo2.getType());
-		}
 
-		return new ExpressionInfo("", "int", "");
+		String result = newTemp();
+		emit(result + " = " + " sub i32 " + exprInfo.getResult() + " " + exprInfo2.getResult());
+
+		return new ExpressionInfo("", "int", "", result);
 	 }
   
 	 /**
@@ -226,12 +264,11 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	 public Object visit(TimesExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().equals("int") || !exprInfo2.getType().equals("int")) {
-			throw new RuntimeException(exprInfo.getType() + " * " +
-				exprInfo2.getType());
-		}
 
-		return new ExpressionInfo("", "int", "");
+		String result = newTemp();
+		emit(result + " = " + " mul i32 " + exprInfo.getResult() + " " + exprInfo2.getResult());
+
+		return new ExpressionInfo("", "int", "", result);
 	}
 	
    /**
@@ -252,7 +289,8 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 		}
 
 		String type = exprInfo.getType();
-		return new ExpressionInfo("", type.substring(0, type.indexOf('[')), "");
+		return new ExpressionInfo("", type.substring(0, type.indexOf('[')), "",
+				exprInfo.getResult() + " [" + exprInfo2.getResult() + "]");
 	 }
   
 	 /**
@@ -352,9 +390,24 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	*/
 	public Object visit(NotExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f1.accept(this, argu);
-		if (!exprInfo.getType().equals("boolean")) {
-			throw new RuntimeException("!" + exprInfo.getType());
-		}
+
+		String t = newTemp();
+		String result = newTemp();
+		String btrue = newLabel();
+		String bfalse = newLabel();
+		String end = newLabel();
+
+		emit(t + " = icmp eq i32 " + exprInfo.getResult() + ", 1\n");
+		emit("br i1 " + t + ", label %btrue, label %bfalse\n" );
+		emit(btrue + ":\n");
+		emit("\t" + result + " = add i32 0, 0\n");
+		emit("\tbr label %end\n");
+		emit(bfalse + ":\n");
+		emit("\t" + result + " = add i32 1, 0\n");
+		emit("  br label %end\n");
+		emit(end + ":\n");
+
+		exprInfo.setResult(result);
 		return exprInfo;
    }
   
@@ -372,28 +425,30 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 		StatementInfo statementInfo = (StatementInfo) argu;
 
 		if (n.f0.which == 0) {
-			return new ExpressionInfo("", "int", (String) n.f0.accept(this, null));
+			String integerLiteral = (String) n.f0.accept(this, null);
+			return new ExpressionInfo("", "int", integerLiteral, integerLiteral);
 		}
 		else if (n.f0.which == 1 || n.f0.which == 2) {
-			return new ExpressionInfo("", "boolean", (String) n.f0.accept(this, null));
+			String booleanLiteral = (String) n.f0.accept(this, null);
+			String value = (booleanLiteral == "true" ? "1" : "0");
+			return new ExpressionInfo("", "boolean", booleanLiteral, value);
 		}
 		else if (n.f0.which == 3) {
 			String variable = (String) n.f0.accept(this, null);
 			String type = statementInfo.getType(variable);
-			if (type == null) {
-				throw new RuntimeException("Identifier " + variable + " is not declared");
-			}
-			return new ExpressionInfo(variable, type, "");
+
+			String result = newTemp();
+			emit(result + " = load " + getIRType(type) + ", " + getIRType(type) + "*" +
+					variable);
+			return new ExpressionInfo(variable, type, "", result);
 		}
 		else if (n.f0.which == 4) {
-			return new ExpressionInfo("", statementInfo.getName(), "this");
+			return new ExpressionInfo("", statementInfo.getName(), "this", "TODO");
 		}
 		else if (n.f0.which == 6) {
 			ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, null);
-			if (!symbolTable.classExists(exprInfo.getType())) {
-				throw new RuntimeException("Class " + exprInfo.getType() + " is not declared");
-			}
-			return new ExpressionInfo("new", exprInfo.getType(), "");
+
+			return new ExpressionInfo("new", exprInfo.getType(), "", "TODO");
 		}
 		else { // 5 || 7
 			return n.f0.accept(this, argu);
@@ -486,6 +541,32 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	* f17 -> "}"
 	*/
 	public Object visit(MainClass n, Object argu) {
+		emit("declare i8* @calloc(i32, i32)\n" +
+			"declare i32 @printf(i8*, ...)\n" +
+		 	"declare void @exit(i32)\n" +
+			"@_cint = constant [4 x i8] c\"%d\0a\00\"\n" +
+			"@_cOOB = constant [15 x i8] c\"Out of bounds\0a\00\"\n" +
+			"@_cNSZ = constant [15 x i8] c\"Negative size\0a\00\"\n" +
+		
+			"define void @print_int(i32 %i) {\n" +
+				"%_str = bitcast [4 x i8]* @_cint to i8*\n" +
+				"call i32 (i8*, ...) @printf(i8* %_str, i32 %i)\n" +
+				"ret void\n" +
+			"}\n" +
+			"define void @throw_oob() {\n" +
+				"%_str = bitcast [15 x i8]* @_cOOB to i8*\n" +
+				"call i32 (i8*, ...) @printf(i8* %_str)\n" +
+				"call void @exit(i32 1)\n" +
+				"ret void\n" +
+			"}\n" +
+			"define void @throw_nsz() {\n" +
+				"%_str = bitcast [15 x i8]* @_cNSZ to i8*\n" +
+				"call i32 (i8*, ...) @printf(i8* %_str)\n" +
+				"call void @exit(i32 1)\n" +
+				"ret void\n" +
+			"}\n"
+		);
+
 		String className = (String) n.f1.accept(this, argu);
 		ClassInfo classInfo = symbolTable.getClassInfo(className);
 		
@@ -577,7 +658,7 @@ public class GenerationVisitor extends GJDepthFirst <Object, Object> {
 	public Object visit(VarDeclaration n, Object argu) {
 		String type = (String) n.f0.accept(this, null);
 		String identifier = (String) n.f0.accept(this, null);
-		emit(null, "%" + identifier + " = alloca " + getType(type));
+		emit("%" + identifier + " = alloca " + getIRType(type));
 		return null;
 	 }
 

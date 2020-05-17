@@ -67,8 +67,9 @@ class Main {
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			Goal root = parser.Goal();
 
-    		fileWriter = new FileWriter(getBaseName(fileName) + ".ll");
-			GenerationVisitor generationVisitor = new GenerationVisitor(symbolTable, offsetTable, fileWriter);
+			fileWriter = new FileWriter(getBaseName(fileName) + ".ll");
+			GenerationVisitor generationVisitor = new GenerationVisitor(symbolTable,
+					offsetTable, fileWriter);
 			root.accept(generationVisitor, null);
 		} catch (IOException e) {
 			System.out.println("An error occurred.");
@@ -88,6 +89,7 @@ class Main {
 	}
 
 	public static String getBaseName(String path) {
-		return path.substring(0, path.lastIndexOf('.'));
+        String last = path.substring(path.lastIndexOf("/")+1);
+		return last.substring(0, last.lastIndexOf('.'));
 	}
 }

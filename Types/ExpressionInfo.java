@@ -4,11 +4,13 @@ public class ExpressionInfo {
 	String id;
 	String type;
 	String value;
+	String result;
 
-	public ExpressionInfo(String id, String type, String value) {
+	public ExpressionInfo(String id, String type, String value, String result) {
 		this.id = id;
 		this.type = type;
 		this.value = value;
+		this.result = result;
 	}
 
 	public String getType() {
@@ -33,6 +35,14 @@ public class ExpressionInfo {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getResult() {
+		return this.result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
 	}
 
 	public String toString() {
