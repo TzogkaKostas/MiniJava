@@ -85,8 +85,27 @@ public class ClassInfo {
 		this.methodOffset = methodOffset;
 	}	
 
-	public LinkedHashMap<String, MethodInfo> getMethods() {
+	public LinkedHashMap<String, MethodInfo> getMethods() { 
 		return this.methods;
+	}
+
+	public LinkedHashMap<String, MethodInfo> getTrueMethods() {		
+
+		LinkedHashMap<String, MethodInfo> trueMethods = new LinkedHashMap<String, MethodInfo>();
+		for (Entry<String, MethodInfo> entry : this.methods.entrySet()) {
+			if (!trueMethods.containsKey(entry.getKey())) {
+				trueMethods.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		if (extendsInfo != null) {
+			LinkedHashMap<String, MethodInfo> newTrueMethods = extendsInfo.getTrueMethods();
+			newTrueMethods.putAll(trueMethods);
+			return newTrueMethods;
+		}
+		else {
+			return trueMethods;
+		}
 	}
 
 	public void setMethods(LinkedHashMap<String,MethodInfo> methods) {

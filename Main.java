@@ -67,12 +67,14 @@ class Main {
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			Goal root = parser.Goal();
 
-			fileWriter = new FileWriter(getBaseName(fileName) + ".ll");
 			GenerationVisitor generationVisitor = new GenerationVisitor(symbolTable,
 					offsetTable, fileWriter);
 			root.accept(generationVisitor, null);
+			
+			fileWriter = new FileWriter("llvm/" + getBaseName(fileName) + ".ll");
+			fileWriter.write(generationVisitor.getCodeBuffer());
 		} catch (IOException e) {
-			System.out.println("An error occurred.");
+			System.out.println("llvm/" + getBaseName(fileName) + ".ll");
 			e.printStackTrace();
 		} catch (ParseException ex) {
 			System.out.println(ex.getMessage());
@@ -91,5 +93,9 @@ class Main {
 	public static String getBaseName(String path) {
         String last = path.substring(path.lastIndexOf("/")+1);
 		return last.substring(0, last.lastIndexOf('.'));
+	}
+
+	public void createLLVMFile() {
+		
 	}
 }

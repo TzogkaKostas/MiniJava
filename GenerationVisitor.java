@@ -2,15 +2,13 @@ import syntaxtree.*;
 import visitor.GJDepthFirst;
 import Types.*;
 import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Function;
 import java.io.FileWriter;
-// import java.io.*;
 
 public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	SymbolTable symbolTable;
 	OffsetTable offsetTable;
 	FileWriter fileWriter;
+	String codeBuffer;
 	Map<String, String> types;
 	Integer regCount;
 	Integer labelCount;
@@ -19,6 +17,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		this.symbolTable = symbolTable;
 		this.offsetTable = offsetTable;
 		this.fileWriter = fileWriter;
+		this.codeBuffer = "";
 		this.regCount = 0;
 		this.labelCount = 0;
 		this.types = Map.of("boolean[]", "i8*", "boolean", "i8", "int[]", "i32*", "int", "i32");
@@ -32,14 +31,13 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		return this.offsetTable;
 	}
 
-	public void emit(String code) {
-		System.out.print(code);
+	public String getCodeBuffer() {
+		return this.codeBuffer;
+	}
 
-		// try {
-		// fileWriter.write(code);
-		// } catch (IOException e) {
-		// System.out.println(" Eroor: " + code);
-		// }
+	public void emit(String code) {
+		// System.out.print(code);
+		codeBuffer += code;
 	}
 
 	public void emitGeneralFunctions() {
@@ -71,9 +69,10 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	public void emitVTables() {
 		for (ClassInfo classInfo : symbolTable.getClasses()) {
 			if (classInfo.getName() != symbolTable.getMainClassName()) {
+				LinkedHashMap<String, MethodInfo> methods = classInfo.getTrueMethods();
 				emit("@." + classInfo.getName() + "_vtable = global [" + 
-						classInfo.getNumOfMethods().toString() + " x i8*] [\n");
-				emitVTable(classInfo);
+						methods.size() + " x i8*] [\n");
+				emitVTable(classInfo, methods);
 			}
 			else {
 				emit("@." + classInfo.getName() + "_vtable = global [0 x i8*] [");
@@ -82,9 +81,9 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		}
 	}
 
-	public void emitVTable(ClassInfo classInfo) {
+	public void emitVTable(ClassInfo classInfo, LinkedHashMap<String, MethodInfo> methods) {
 		Integer i = 0;
-		for (MethodInfo methodInfo : classInfo.getMethods().values()) {
+		for (MethodInfo methodInfo : methods.values()) {
 			String entry = "\ti8* bitcast (" + getIRType(methodInfo.getReturnType()) + 
 					" " + getIRTypes(methodInfo.getParamNames()) + "* @" + 
 					classInfo.getName() + "." + methodInfo.getName() + " to i8*)";
