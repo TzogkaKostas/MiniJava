@@ -46,8 +46,5 @@ define i32 @main() {
     ; Call print, passing %_0 as argument
     call void (i32) @print_int(i32 %_0)
 
-    %sum = add i32 %_0, %_0
-    call void (i32) @print_int(i32 %sum)
-
     ret i32 0
 }

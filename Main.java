@@ -1,3 +1,5 @@
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -61,18 +63,21 @@ class Main {
 	public static void generateIR(String fileName, SymbolTable symbolTable,
 			OffsetTable offsetTable) {
 		FileInputStream fis = null;
-		FileWriter fileWriter = null;
+		FileWriter  fileWriter = null;
 		try{
 			fis = new FileInputStream(fileName);
 			MiniJavaParser parser = new MiniJavaParser(fis);
 			Goal root = parser.Goal();
 
 			GenerationVisitor generationVisitor = new GenerationVisitor(symbolTable,
-					offsetTable, fileWriter);
+					offsetTable);
 			root.accept(generationVisitor, null);
 			
 			fileWriter = new FileWriter("llvm/" + getBaseName(fileName) + ".ll");
 			fileWriter.write(generationVisitor.getCodeBuffer());
+			fileWriter.flush();
+
+
 		} catch (IOException e) {
 			System.out.println("llvm/" + getBaseName(fileName) + ".ll");
 			e.printStackTrace();
