@@ -4,10 +4,18 @@ import java.util.*;
 public class StatementInfo {
 	ClassInfo classInfo;
 	String curMethodName;
+	StringBuilder code;
 
 	public StatementInfo(ClassInfo classInfo, String curMethodName) {
 		this.classInfo = classInfo;
 		this.curMethodName = curMethodName;
+		this.code = new StringBuilder("");
+	}
+
+	public StatementInfo(ClassInfo classInfo, String curMethodName, StringBuilder code) {
+		this.classInfo = classInfo;
+		this.curMethodName = curMethodName;
+		this.code = code;
 	}
 
 	public ClassInfo getClassInfo() {
@@ -28,6 +36,18 @@ public class StatementInfo {
 
 	public void setCurMethodName(String curMethodName) {
 		this.curMethodName = curMethodName;
+	}
+
+	public StringBuilder getCode() {
+		return this.code;
+	}
+
+	public void setCode(StringBuilder code) {
+		this.code = code;
+	}
+
+	public void appendCode(String code) {
+		this.code.append(code);
 	}
 
 	// public boolean isVarDeclared(String identifier) {

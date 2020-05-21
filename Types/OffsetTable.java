@@ -45,14 +45,11 @@ class Items {
 	}
 
 	public Integer getVarOffset(String variable) {
-		System.out.println("11 " +  variable);
 		for (Item item : vars) {
-			System.out.println(variable + "," + item.getItemName());
 			if (item.getItemName().equals(variable)) {
 				return item.getOffset();
 			}
 		}
-		System.out.println("2 " +  variable);
 		return -1;
 	}
 

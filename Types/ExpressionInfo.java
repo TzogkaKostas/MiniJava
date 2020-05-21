@@ -5,12 +5,22 @@ public class ExpressionInfo {
 	String type;
 	String value;
 	String result;
+	String code;
 
 	public ExpressionInfo(String id, String type, String value, String result) {
 		this.id = id;
 		this.type = type;
 		this.value = value;
 		this.result = result;
+	}
+
+	public ExpressionInfo(String id, String type, String value, String result,
+			String code) {
+		this.id = id;
+		this.type = type;
+		this.value = value;
+		this.result = result;
+		this.code = code;
 	}
 
 	public ExpressionInfo(String id, String type, String value) {
@@ -49,6 +59,14 @@ public class ExpressionInfo {
 
 	public void setResult(String result) {
 		this.result = result;
+	}
+
+	public String getCode() {
+		return this.code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String toString() {
