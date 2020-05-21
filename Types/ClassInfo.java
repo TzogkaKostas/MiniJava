@@ -53,8 +53,12 @@ public class ClassInfo {
 	// 	this.name = name;
 	// }
 
+	public Integer getSize() {
+		return this.varOffset;
+	}
+
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public ClassInfo getExtendsInfo() {
@@ -225,13 +229,7 @@ public class ClassInfo {
 	}
 
 	public Integer getNumOfMethods() {
-		Integer numOfMethods = methods.size();
-		if (extendsInfo == null) {
-			return numOfMethods;
-		}
-		else {
-			return numOfMethods + extendsInfo.getNumOfMethods();
-		}
+		return getTrueMethods().size();
 	}
 
 	public void print() {
@@ -244,6 +242,15 @@ public class ClassInfo {
 				System.out.print("Method " + name);
 				methods.get(name).print();
 			}
+		}
+	}
+
+	public boolean variableExists(String variable) {
+		if (getVarType(variable) != null) {
+			return true;
+		}
+		else {
+			return false;
 		}
 	}
 

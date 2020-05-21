@@ -40,10 +40,43 @@ class Items {
 		return vars;
 	}
 
-	
 	public ArrayList<Item> getMethods() {
 		return methods;
 	}
+
+	public Integer getVarOffset(String variable) {
+		System.out.println("11 " +  variable);
+		for (Item item : vars) {
+			System.out.println(variable + "," + item.getItemName());
+			if (item.getItemName().equals(variable)) {
+				return item.getOffset();
+			}
+		}
+		System.out.println("2 " +  variable);
+		return -1;
+	}
+
+	// public Integer getSize() {
+	// 	if (!vars.isEmpty()) {
+	// 		Item item = vars.get(vars.size() - 1);
+	// 		return item.getOffset() + sizeOf(item.getItemName());
+	// 	}
+	// 	else {
+	// 		return 0;
+	// 	}
+	// }
+
+	// public Integer sizeOf(String type) {
+	// 	if (type.equals("int")) {
+	// 		return 4;
+	// 	}
+	// 	else if (type.equals("boolean")) {
+	// 		return 1;
+	// 	}
+	// 	else {
+	// 		return 8;
+	// 	}
+	// }
 
 	public void print(String className) {
 		printVars(className);
@@ -74,6 +107,10 @@ public class OffsetTable {
 
 	public OffsetTable() {
 		this.items = new LinkedHashMap<String, Items>();
+	}
+
+	public Integer getVarOffset(String className, String variable) {
+		return items.get(className).getVarOffset(variable);
 	}
 
 	public void insertVar(String className, String itemName, Integer offset) {
@@ -128,10 +165,6 @@ public class OffsetTable {
 			methodOffset += 8;
 		}
 		classInfo.setMethodOffset(methodOffset);
-	}
-
-	public void emitVTables() {
-		
 	}
 	
 	public Integer sizeOf(String type) {

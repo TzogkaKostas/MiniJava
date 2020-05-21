@@ -73,6 +73,14 @@ public class SymbolTable {
 		return classes.values();
 	}
 
+	public Integer getClassSize(String className) {
+		return classes.get(className).getSize();
+	}
+
+	public Integer getNumOfMethods(String className) {
+		return classes.get(className).getNumOfMethods();
+	}
+
 	public void print() {
 		for (String name: classes.keySet()){
 			System.out.print("class " + name);

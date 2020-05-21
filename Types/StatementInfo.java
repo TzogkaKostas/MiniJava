@@ -69,6 +69,10 @@ public class StatementInfo {
 		return classInfo.getMethod(methodName).getReturnType();
 	}
 
+	public boolean isClassVariable(String variable) {
+		return classInfo.variableExists(variable);
+	}
+
 	public void print() {
 		classInfo.print();
 		System.out.println(curMethodName);
