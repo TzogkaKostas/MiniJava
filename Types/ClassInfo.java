@@ -98,6 +98,7 @@ public class ClassInfo {
 		LinkedHashMap<String, MethodInfo> trueMethods = new LinkedHashMap<String, MethodInfo>();
 		for (Entry<String, MethodInfo> entry : this.methods.entrySet()) {
 			if (!trueMethods.containsKey(entry.getKey())) {
+				entry.getValue().setOriginClass(this);
 				trueMethods.put(entry.getKey(), entry.getValue());
 			}
 		}

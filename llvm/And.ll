@@ -34,23 +34,26 @@ define i32 @main() {
 	%x = alloca i32
 	store i1 0, i1* %b
 	store i1 1, i1* %c
+	%_0 = load i1, i1* %b
+	br i1 %_0, label %L1, label %L0
+L0:
+	br label %L3
+L1:
+	%_1 = load i1, i1* %c
+	br label %L2
+L2:
+	br label %L3
+L3:
+	%_2 = phi i1 [0, %L0], [%_1, %L2]
+	br i1 %_2, label %L4, label %L5
+	L4:
 	store i32 0, i32* %x
-	store i32 1, i32* %x
-	br i1 %_0 , label %L0, label %L0
-	L0:
-	%_6 = add i1 0, %_0	br label %L0
-	L0:
-	%_7 = add i1 0, %_1	br label %L0
-	L0:
-	%_5 = phi i1 [%_6, %L0], [%_7, %L0]
-	br i1 %_5, label %L0, label %L0
-	L0:
-	br label %L0
-	L0:
-	br label %L0
-	L0:
-	%_11 = load i32, i32* %x
-	call void (i32) @print_int(i32 %_11)
+	br label %L6
+	L5:
+	br label %L6
+	L6:
+	%_3 = load i32, i32* %x
+	call void (i32) @print_int(i32 %_3)
 	ret i32 0
 }
 

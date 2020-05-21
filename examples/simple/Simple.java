@@ -1,6 +1,6 @@
 class Simple {
 	public static void main(String[] a) {
-		int x;
+	    int x;
 
         x = 10;
 

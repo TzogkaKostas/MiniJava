@@ -2,11 +2,14 @@ package Types;
 import java.util.*;
 import java.util.Map.Entry;
 
+import javax.print.DocFlavor.STRING;
+
 public class MethodInfo {
 	String name;
 	String returnType;
 	Variables allVariables;
 	Variables parameters;
+	ClassInfo originClass;
 
 	public MethodInfo(String name, String returnType) {
 		this.name = name;
@@ -17,6 +20,18 @@ public class MethodInfo {
 		this.name = name;
 		this.returnType = returnType;
 		this.allVariables = allVariables;
+	}
+
+	public ClassInfo getOriginClass() {
+		return this.originClass;
+	}
+
+	public String getOriginClassName() {
+		return this.originClass.getName();
+	}
+
+	public void setOriginClass(ClassInfo origiClassInfo) {
+		this.originClass = origiClassInfo;
 	}
 
 	public String getName() {

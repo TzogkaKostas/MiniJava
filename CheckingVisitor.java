@@ -267,7 +267,8 @@ public class CheckingVisitor extends GJDepthFirst <Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
 		String identifier = (String) n.f2.accept(this, argu);
-		if (exprInfo.getType().contains("int") || exprInfo.getType().contains("boolean") ) {
+		if (exprInfo.getType().equals("int") || exprInfo.getType().equals("int[]") ||
+				exprInfo.getType().equals("boolean") || exprInfo.getType().equals("boolean[]")) {
 			throw new RuntimeException("dot (.) operator can't used be on " +
 				exprInfo.getType());
 		}
