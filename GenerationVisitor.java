@@ -238,21 +238,37 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 
 		String identifier = (String) n.f0.accept(this, statementInfo);
 		String type = statementInfo.getType(identifier);
-		if (type == null) {
-			throw new RuntimeException("Identifier " + identifier + " is not declared");
-		}
-		
-		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
-		if (!exprInfo.getType().equals("int")) {
-			throw new RuntimeException(exprInfo.getType() +
-				" can't be an index of " + identifier + " array");
-		}
+
+		ExpressionInfo exprInfo1 = (ExpressionInfo) n.f2.accept(this, statementInfo);
+
+		String t1 = newTemp();
+		String t2 = newTemp();
+		String t3 = newTemp();
+		String t4 = newTemp();
+		String t5 = newTemp();
+		String t6 = newTemp();
+		String t7 = newTemp();
+		String label1 = newLabel();
+		String label2 = newLabel();
+
+		String arrayCode = exprInfo1.getCode();
+		arrayCode += "\t" + t1 + " = load i32*, i32** %" + identifier + "\n";
+		arrayCode += "\t" + t2 + " = load i32, i32* " + t1 + "\n";
+		arrayCode += "\t" + t3 + " = icmp sge i32 " + exprInfo1.getResult() + ", 0";
+		arrayCode += "\t" + t4 + " = icmp slt i32 0, " + t2 + "\n";
+		arrayCode += "\t" + t5 + " = and i1 " + t4 + ", " + t5 + "\n";
+		arrayCode += "\tbr i1 " + t5 + ", label %" + label1 + ", label %" + label2 + "\n";
+		arrayCode += label2 + ":\n";
+		arrayCode += "\tcall void @throw_oob()";
+		arrayCode += "\tbr label %" + label1 + "\n";
+		arrayCode += label1 + ":\n";
+		arrayCode += "\t" + t6 + " = add i32 1, " + exprInfo1.getResult() + "\n";
+		arrayCode += "\t" + t7 + " = getelementptr i32, i32* " + t1 + ", i32 " + t7 + "\n";
 
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
-		if (!type.equals(exprInfo2.getType() + "[]")) {
-			throw new RuntimeException("Invalid ArrayAssignmentStatement");
-		}
-		return null;
+		arrayCode += "store i32 " + exprInfo2.getCode() + ", i32* " + t7 + "\n";
+
+		return arrayCode;
 	}
 
 	/**
@@ -673,8 +689,27 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	* f4 -> "]"
 	*/
    public Object visit(IntegerArrayAllocationExpression n, Object argu) {
-		n.f3.accept(this, argu);
-		return new ExpressionInfo("new", "int[]", "");
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f3.accept(this, argu);
+
+		String t1 = newTemp();
+		String t2 = newTemp();
+		String t3 = newTemp();
+		String t4 = newTemp();
+		String label1 = newLabel();
+		String label2 = newLabel();
+
+		String intArrayCode = exprInfo.getCode();
+		intArrayCode += "\t" + t1 + " = add i32 1, " + exprInfo.getResult() + "\n";
+		intArrayCode += "\t" + t2 + " = icmp sge i32 " + t1 + ", 1\n";
+		intArrayCode += "\tbr i1 " + t2 + ", label %" + label1 + ", label %" + label2 + "\n";
+		intArrayCode += label2 + ":\n";
+		intArrayCode += "\tcall void @throw_nsz()\n";
+		intArrayCode += "\tbr label %" + label1 + "\n";
+		intArrayCode += label1 + ":\n";
+		intArrayCode += "\t" + t3 + " = call i8* @calloc(i32 " + t1 + ", i32 4)\n";
+		intArrayCode += "\t" + t4 + " = bitcast i8* " + t3 + " to i32*\n";
+	
+		return new ExpressionInfo("new", "int[]", "", t4, intArrayCode);
    	}
 
 	/**
@@ -823,7 +858,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		n.f8.accept(this, statementInfo);
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f10.accept(this, statementInfo);
-		String returnCode = "\t" + exprInfo.getCode() + "\tret " + getIRType(type) +
+		String returnCode = exprInfo.getCode() + "\tret " + getIRType(type) +
 				" " + exprInfo.getResult() + "\n}\n\n";
 
 		String body = paramsAllocation + declarationCode + statementInfo.getCode() + 

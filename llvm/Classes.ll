@@ -63,14 +63,14 @@ define i32 @Base.set(i8* %this, i32 %.x) {
 	%_8 = getelementptr i8, i8* %this, i32 0
 	%_9 = bitcast i8* %_8 to i32*
 	store i32 %_7, i32* %_9
-		%_11 = getelementptr i8, i8* %this, i32 0
+	%_11 = getelementptr i8, i8* %this, i32 0
 	%_12 = bitcast i8* %_11 to i32*
 	%_10 = load i32, i32* %_12
 	ret i32 %_10
 }
 
 define i32 @Base.get(i8* %this) {
-		%_14 = getelementptr i8, i8* %this, i32 0
+	%_14 = getelementptr i8, i8* %this, i32 0
 	%_15 = bitcast i8* %_14 to i32*
 	%_13 = load i32, i32* %_15
 	ret i32 %_13
@@ -83,7 +83,7 @@ define i32 @Derived.set(i8* %this, i32 %.x) {
 	%_17 =  mul i32 %_16, 2	%_18 = getelementptr i8, i8* %this, i32 0
 	%_19 = bitcast i8* %_18 to i32*
 	store i32 %_17, i32* %_19
-		%_21 = getelementptr i8, i8* %this, i32 0
+	%_21 = getelementptr i8, i8* %this, i32 0
 	%_22 = bitcast i8* %_21 to i32*
 	%_20 = load i32, i32* %_22
 	ret i32 %_20
