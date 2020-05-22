@@ -46,46 +46,69 @@ define i32 @main() {
 	%_2 = getelementptr [2 x i8*], [2 x i8*]* @.Base_vtable, i32 0, i32 0
 	store i8** %_2, i8*** %_1
 	store i8* %_0, i8** %b
+
 	%_3 = call i8* @calloc(i32 1, i32 4)
 	%_4 = bitcast i8* %_3 to i8***
 	%_5 = getelementptr [2 x i8*], [2 x i8*]* @.Derived_vtable, i32 0, i32 0
 	store i8** %_5, i8*** %_4
 	store i8* %_3, i8** %d
-	%_6 = load i8*, i8** %d
-	store i8* %_6, i8** %b
+
+	%_6 = load i8*, i8** %b
+	%_7 = bitcast i8* %_6 to i8***
+	%_8 = load i8**, i8*** %_7
+	%_9 = getelementptr i8*, i8** %_8, i32 0
+	%_10 = load i8*, i8** %_9
+	%_11 = bitcast i8* %_10 to i32 (i8*, i32)*
+	%_12 = call i32 %_11(i8* %_6, i32 1)
+	call void (i32) @print_int(i32 %_12)
+
+	%_13 = load i8*, i8** %d
+	store i8* %_13, i8** %b
+
+	%_14 = load i8*, i8** %b
+	%_15 = bitcast i8* %_14 to i8***
+	%_16 = load i8**, i8*** %_15
+	%_17 = getelementptr i8*, i8** %_16, i32 0
+	%_18 = load i8*, i8** %_17
+	%_19 = bitcast i8* %_18 to i32 (i8*, i32)*
+	%_20 = call i32 %_19(i8* %_14, i32 3)
+	call void (i32) @print_int(i32 %_20)
+
 	ret i32 0
 }
 
 define i32 @Base.set(i8* %this, i32 %.x) {
 	%x = alloca i32
 	store i32 %.x, i32* %x
-	%_7 = load i32, i32* %x
-	%_8 = getelementptr i8, i8* %this, i32 0
-	%_9 = bitcast i8* %_8 to i32*
-	store i32 %_7, i32* %_9
-	%_11 = getelementptr i8, i8* %this, i32 0
-	%_12 = bitcast i8* %_11 to i32*
-	%_10 = load i32, i32* %_12
-	ret i32 %_10
+	%_21 = load i32, i32* %x
+	%_22 = getelementptr i8, i8* %this, i32 0
+	%_23 = bitcast i8* %_22 to i32*
+	store i32 %_21, i32* %_23
+
+	%_25 = getelementptr i8, i8* %this, i32 0
+	%_26 = bitcast i8* %_25 to i32*
+	%_24 = load i32, i32* %_26
+	ret i32 %_24
 }
 
 define i32 @Base.get(i8* %this) {
-	%_14 = getelementptr i8, i8* %this, i32 0
-	%_15 = bitcast i8* %_14 to i32*
-	%_13 = load i32, i32* %_15
-	ret i32 %_13
+	%_28 = getelementptr i8, i8* %this, i32 0
+	%_29 = bitcast i8* %_28 to i32*
+	%_27 = load i32, i32* %_29
+	ret i32 %_27
 }
 
 define i32 @Derived.set(i8* %this, i32 %.x) {
 	%x = alloca i32
 	store i32 %.x, i32* %x
-	%_16 = load i32, i32* %x
-	%_17 =  mul i32 %_16, 2	%_18 = getelementptr i8, i8* %this, i32 0
-	%_19 = bitcast i8* %_18 to i32*
-	store i32 %_17, i32* %_19
-	%_21 = getelementptr i8, i8* %this, i32 0
-	%_22 = bitcast i8* %_21 to i32*
-	%_20 = load i32, i32* %_22
-	ret i32 %_20
+	%_30 = load i32, i32* %x
+	%_31 =  mul i32 %_30, 2	%_32 = getelementptr i8, i8* %this, i32 0
+	%_33 = bitcast i8* %_32 to i32*
+	store i32 %_31, i32* %_33
+
+	%_35 = getelementptr i8, i8* %this, i32 0
+	%_36 = bitcast i8* %_35 to i32*
+	%_34 = load i32, i32* %_36
+	ret i32 %_34
 }
 

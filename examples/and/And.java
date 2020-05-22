@@ -6,6 +6,7 @@ class And {
 	    
         b = false;
         c = true;
+
         if (b && c)
             x = 0;
         else

@@ -20,7 +20,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		this.codeBuffer = "";
 		this.regCount = 0;
 		this.labelCount = 0;
-		this.types = Map.of("boolean[]", "i1*", "boolean", "i1", "int[]", "i32*", "int", "i32");
+		this.types = Map.of("boolean[]", "i8*", "boolean", "i8", "int[]", "i32*", "int", "i32");
 	}
 
 	public SymbolTable getSymbolTable() {
@@ -129,6 +129,10 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		return IRtypes + ")";
 	}
 
+	private String typeOfPointer(String pointer) {
+		return pointer.substring(0, pointer.lastIndexOf("*"));
+	}
+
 	private String getIRParams(MethodInfo methodInfo) {
 		String IRParams = "(i8* %this";
 		for (Entry<String, String> entry : methodInfo.getParameters().getEntries() ) {
@@ -137,13 +141,23 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		return IRParams + ")";
 	}
 
-	private Integer getVarOffset(ClassInfo classInfo, String identifier) {
-		Integer varOffset = offsetTable.getVarOffset(classInfo.getName(), identifier);
+	private Integer getVarOffset(ClassInfo classInfo, String variable) {
+		Integer varOffset = offsetTable.getVarOffset(classInfo.getName(), variable);
 		if (varOffset != -1) {
 			return varOffset;
 		}
 		else {
-			return getVarOffset(classInfo.getExtendsInfo(), identifier);
+			return getVarOffset(classInfo.getExtendsInfo(), variable);
+		}
+	}
+
+	private Integer getMethodOffset(ClassInfo classInfo, String methodName) {
+		Integer varOffset = offsetTable.getMethodOffset(classInfo.getName(), methodName);
+		if (varOffset != -1) {
+			return varOffset;
+		}
+		else {
+			return getMethodOffset(classInfo.getExtendsInfo(), methodName);
 		}
 	}
 
@@ -156,6 +170,31 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		}
 		return localVariables;
 	}
+
+	private String getMethodArgs(ArrayList<ExpressionInfo> args) {
+		String IRargs = "";
+		for (ExpressionInfo exprInfo : args) {
+			IRargs += ", " + getIRType(exprInfo.getType()) + " " + exprInfo.getResult();
+		}
+		return IRargs;
+	}
+
+	private String getMethodArgsIRTypes(ArrayList<ExpressionInfo> args) {
+		String IRargsTypes = "";
+		for (ExpressionInfo exprInfo : args) {
+			IRargsTypes += ", " + getIRType(exprInfo.getType());
+		}
+		return IRargsTypes;
+	}
+
+	private String getMethodArgsCode(ArrayList<ExpressionInfo> args) {
+		String argsCode = "";
+		for (ExpressionInfo exprInfo : args) {
+			argsCode += exprInfo.getCode();
+		}
+		return argsCode;
+	}
+	
 
 	// private ArrayList<String> classesThatInheritMethod(String superClass, String method) {
 	// 	ArrayList<String> classes = new ArrayList<>();
@@ -171,11 +210,6 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	// 	return str.substring(0, str.lastIndexOf(","));
 	// }
 
-	// private Integer getSize(String identifier) {
-
-	// 	return 1;
-	// }
-
    /**
 	* f0 -> Block()
 	*       | AssignmentStatement()
@@ -188,9 +222,24 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		StatementInfo statementInfo = (StatementInfo) argu;
 
 		String statementCode = (String) n.f0.accept(this, argu);
-		statementInfo.appendCode(statementCode);
+		statementInfo.appendCode(statementCode + "\n");
 
 		return null;
+	}
+
+	/**
+	* f0 -> "{"
+	* f1 -> ( Statement() )*
+	* f2 -> "}"
+	*/
+	public Object visit(Block n, Object argu) {
+		StatementInfo statementInfo = (StatementInfo) argu;
+
+		StatementInfo newStatementInfo = new StatementInfo(statementInfo.getClassInfo(),
+				statementInfo.getCurMethodName());
+		n.f1.accept(this, newStatementInfo);
+
+		return newStatementInfo.getCode().toString();
 	}
 
    	/**
@@ -241,6 +290,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 
 		ExpressionInfo exprInfo1 = (ExpressionInfo) n.f2.accept(this, statementInfo);
 
+		String t0 = newTemp();
 		String t1 = newTemp();
 		String t2 = newTemp();
 		String t3 = newTemp();
@@ -252,21 +302,34 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String label2 = newLabel();
 
 		String arrayCode = exprInfo1.getCode();
-		arrayCode += "\t" + t1 + " = load i32*, i32** %" + identifier + "\n";
+		arrayCode += "\t" + t0 + " = load " + getIRType(type) + ", " + 
+				getIRType(type) + "* %" + identifier + "\n";
+		
+		if (type.equals("boolean[]")) {
+			arrayCode += "\t" + t1 + " = bitcast i8* " + t0 + " to i32*\n";
+		}
+		else {
+			t1 = t0;
+		}
+
 		arrayCode += "\t" + t2 + " = load i32, i32* " + t1 + "\n";
-		arrayCode += "\t" + t3 + " = icmp sge i32 " + exprInfo1.getResult() + ", 0";
+		arrayCode += "\t" + t3 + " = icmp sge i32 " + exprInfo1.getResult() + ", 0\n";
 		arrayCode += "\t" + t4 + " = icmp slt i32 0, " + t2 + "\n";
 		arrayCode += "\t" + t5 + " = and i1 " + t4 + ", " + t5 + "\n";
 		arrayCode += "\tbr i1 " + t5 + ", label %" + label1 + ", label %" + label2 + "\n";
 		arrayCode += label2 + ":\n";
-		arrayCode += "\tcall void @throw_oob()";
+		arrayCode += "\tcall void @throw_oob()\n";
 		arrayCode += "\tbr label %" + label1 + "\n";
 		arrayCode += label1 + ":\n";
-		arrayCode += "\t" + t6 + " = add i32 1, " + exprInfo1.getResult() + "\n";
-		arrayCode += "\t" + t7 + " = getelementptr i32, i32* " + t1 + ", i32 " + t7 + "\n";
+		String lengthIndex = type.equals("boolean[]") ? "4" : "1";
+		arrayCode += "\t" + t6 + " = add i32 " + lengthIndex + ", " + exprInfo1.getResult() + "\n";
+		arrayCode += "\t" + t7 + " = getelementptr " + typeOfPointer(getIRType(type)) + ", " + getIRType(type) + 
+				" " + t0 + ", i32 " + t6 + "\n";
 
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
-		arrayCode += "store i32 " + exprInfo2.getCode() + ", i32* " + t7 + "\n";
+		arrayCode += exprInfo2.getCode() + "\tstore " + getIRType(exprInfo2.getType()) +
+				" " + exprInfo2.getResult() + ", " + getIRType(exprInfo2.getType()) +
+				"* " + t7 + "\n";
 
 		return arrayCode;
 	}
@@ -305,8 +368,8 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		n.f6.accept(this, statementInfo2);
 		ifCode += statementInfo2.getCode();
 		ifCode += "\t" + "br label %" + endLabel + "\n";
-
 		ifCode += endLabel + ":\n";
+
 		return ifCode;
 	}
 
@@ -407,8 +470,8 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String result = newTemp();
 
 		String plusCode = exprInfo.getCode() + exprInfo2.getCode();
-		plusCode += "\t" + result + " = " + " add i32 " + exprInfo.getResult() +
-				", " + exprInfo2.getResult();
+		plusCode += "\t" + result + " = " + "add i32 " + exprInfo.getResult() +
+				", " + exprInfo2.getResult() + "\n";
 
 		return new ExpressionInfo("", "int", "", result, plusCode);
 	 }
@@ -457,18 +520,49 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	*/
 	public Object visit(ArrayLookup n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
-		if (!exprInfo.getType().contains("[]")) {
-			throw new RuntimeException(exprInfo.getId() + " is not an array");
-		}
+		String type1 = exprInfo.getType();
+
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo2.getType().equals("int")) {
-			throw new RuntimeException(exprInfo2.getType() +
-				" can't be an index");
+		// String type2 = exprInfo2.getType();
+
+		String t1 = newTemp();
+		String t2 = newTemp();
+		String t3 = newTemp();
+		String t4 = newTemp();
+		String t5 = newTemp();
+		String t6 = newTemp();
+		String t7 = newTemp();
+		String t8 = newTemp();
+		String label1 = newLabel();
+		String label2 = newLabel();
+
+		String lookupCode = exprInfo.getCode() + exprInfo2.getCode();
+		if (type1.equals("boolean[]")) {
+			lookupCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() + " to i32*";
+		}
+		else {
+			t1 = exprInfo.getResult();
 		}
 
-		String type = exprInfo.getType();
-		return new ExpressionInfo("", type.substring(0, type.indexOf('[')), "",
-				exprInfo.getResult() + " [" + exprInfo2.getResult() + "]");
+		lookupCode += "\t" + t2 + " = load i32, i32* " + t1 + "\n";
+		lookupCode += "\t" + t3 + " = icmp sge i32 " + exprInfo2.getResult() + ", 0\n";
+		lookupCode += "\t" + t4 + " = icmp slt i32 " + exprInfo2.getResult() + ", " +
+				t2 + "\n";
+		lookupCode += "\t" + t5 + " = and i1 " + t3 + ", " + t4 + "\n";
+		lookupCode += "\tbr i1 " + t5 + ", label %" + label1 + ", label %" +
+				label2 + "\n";
+		lookupCode += label2 + ":\n";
+		lookupCode += "\tcall void @throw_oob()\n";
+		lookupCode += "\tbr label %" + label1 + "\n";
+		lookupCode += label1 + ":\n";
+		lookupCode += "\t" + t6 + " = add i32 1, " + exprInfo2.getResult() + "\n";
+		lookupCode += "\t" + t7 + " = getelementptr " + typeOfPointer(getIRType(type1)) + ", " +
+				getIRType(type1) + " " + exprInfo.getResult() + ", i32 " + t6 + "\n";
+		lookupCode += "\t" + t8 + " = load " + typeOfPointer(getIRType(type1)) + ", " + 
+				getIRType(type1) + " " + t7 + "\n";
+
+		return new ExpressionInfo("", type1.substring(0, type1.indexOf('[')), "",
+				t8, lookupCode);
 	 }
   
 	 /**
@@ -497,29 +591,37 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		StatementInfo statementInfo = (StatementInfo) argu;
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
-		String identifier = (String) n.f2.accept(this, argu);
-		if (exprInfo.getType().contains("int") || exprInfo.getType().contains("boolean") ) {
-			throw new RuntimeException("dot (.) operator can't used be on " +
-				exprInfo.getType());
-		}
-		if (!symbolTable.classHasMethod(exprInfo.getType(), identifier)) {
-			throw new RuntimeException("There isn't a declaration of method " +
-				identifier + " in class " + exprInfo.getType());
-		}
+		String methodName = (String) n.f2.accept(this, argu);
+		String returnType = symbolTable.getMethodReturnedType(exprInfo.getType(),
+				methodName);
 
 		ArrayList<ExpressionInfo> args = new ArrayList<ExpressionInfo>();
 		Object array[] = new Object[2];
 		array[0] = (Object) statementInfo;
 		array[1] = (Object) args;
 		n.f4.accept(this, array);
-		if (!symbolTable.validMethodArgs(symbolTable, exprInfo.getType(),
-				identifier, args)) {
-			throw new RuntimeException("invalid arguments at function call " + 
-				exprInfo.getType() + "." + identifier);
-		}
 
-		return new ExpressionInfo("", 
-			symbolTable.getMethodReturnedType(exprInfo.getType(), identifier), "");
+		String t1 = newTemp();
+		String t2 = newTemp();
+		String t3 = newTemp();
+		String t4 = newTemp();
+		String t5 = newTemp();
+		String t6 = newTemp();
+
+		String messageCode = exprInfo.getCode() + getMethodArgsCode(args);
+		messageCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() +
+				" to i8***\n";
+		messageCode += "\t" + t2 + " = load i8**, i8*** " + t1 + "\n";
+		messageCode += "\t" + t3 + " = getelementptr i8*, i8** " + t2 + ", i32 " + 
+				getMethodOffset(symbolTable.getClassInfo(exprInfo.getType()),
+				methodName) + "\n";
+		messageCode += "\t" + t4 + " = load i8*, i8** " + t3 + "\n";
+		messageCode += "\t" + t5 + " = bitcast i8* " + t4 + " to " + getIRType(returnType) +
+				" (i8*" + getMethodArgsIRTypes(args) + ")*\n";
+		messageCode += "\t" + t6 + " = call " + getIRType(returnType) + " " + 
+				t5 + "(i8*" + exprInfo.getResult() + getMethodArgs(args) + ")\n";
+
+		return new ExpressionInfo("", returnType, "", t6, messageCode);
 	}
   
 	/**
@@ -529,8 +631,8 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	@SuppressWarnings("unchecked")
 	public Object visit(ExpressionList n, Object argu) {
 		Object array[] = (Object[]) argu;
-		StatementInfo statementInfo = (StatementInfo) array[0];
 
+		StatementInfo statementInfo = (StatementInfo) array[0];
 		ArrayList<ExpressionInfo> args = (ArrayList<ExpressionInfo>) array[1];
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, statementInfo);
@@ -540,12 +642,12 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		return null;
 	}
   
-	 /**
+	/**
 	  * f0 -> ( ExpressionTerm() )*
-	  */
-	 public Object visit(ExpressionTail n, Object argu) {
+	*/
+	public Object visit(ExpressionTail n, Object argu) {
 		return n.f0.accept(this, argu);
-	 }
+	}
   
 	/**
 	* f0 -> ","
@@ -554,6 +656,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	@SuppressWarnings("unchecked")
 	 public Object visit(ExpressionTerm n, Object argu) {
 		Object array[] = (Object[]) argu;
+
 		StatementInfo statementInfo = (StatementInfo) array[0];
 		ArrayList<ExpressionInfo> args = (ArrayList<ExpressionInfo>) array[1];
 
@@ -677,8 +780,30 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	* f4 -> "]"
 	*/
 	public Object visit(BooleanArrayAllocationExpression n, Object argu) {
-		n.f3.accept(this, argu);
-		return new ExpressionInfo("new", "boolean[]", "");
+		ExpressionInfo exprInfo = (ExpressionInfo) n.f3.accept(this, argu);
+
+		String t1 = newTemp();
+		String t2 = newTemp();
+		String t3 = newTemp();
+		String t4 = newTemp();
+		String label1 = newLabel();
+		String label2 = newLabel();
+
+		String boolArrayCode = exprInfo.getCode();
+		boolArrayCode += "\t" + t1 + " = add i32 4, " + exprInfo.getResult() + "\n";
+		boolArrayCode += "\t" + t2 + " = icmp sge i32 " + t1 + ", 4\n";
+		boolArrayCode += "\tbr i1 " + t2 + ", label %" + label1 + ", label %" + 
+				label2 + "\n";
+		boolArrayCode += label2 + ":\n";
+		boolArrayCode += "\tcall void @throw_nsz()\n";
+		boolArrayCode += "\tbr label %" + label1 + "\n";
+	
+		boolArrayCode += label1 + ":\n";
+		boolArrayCode += "\t" + t3 + " = call i8* @calloc(i32 1, i32 " + t1 + ")\n";
+		boolArrayCode += "\t" + t4 + " = bitcast i8* " + t3 + " to i32*\n";
+		boolArrayCode += "\tstore i32 " + exprInfo.getResult() + ", i32* " + t4 + "\n";
+
+		return new ExpressionInfo("new", "boolean[]", "", t3, boolArrayCode);
 	}
 
    /**
@@ -708,6 +833,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		intArrayCode += label1 + ":\n";
 		intArrayCode += "\t" + t3 + " = call i8* @calloc(i32 " + t1 + ", i32 4)\n";
 		intArrayCode += "\t" + t4 + " = bitcast i8* " + t3 + " to i32*\n";
+		intArrayCode += "\t" + "store i32 " + exprInfo.getResult() + ", i32* " + t4 + "\n";
 	
 		return new ExpressionInfo("new", "int[]", "", t4, intArrayCode);
    	}

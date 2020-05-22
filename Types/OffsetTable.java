@@ -53,6 +53,15 @@ class Items {
 		return -1;
 	}
 
+	public Integer getMethodOffset(String variable) {
+		for (Item item : methods) {
+			if (item.getItemName().equals(variable)) {
+				return item.getOffset();
+			}
+		}
+		return -1;
+	}
+
 	// public Integer getSize() {
 	// 	if (!vars.isEmpty()) {
 	// 		Item item = vars.get(vars.size() - 1);
@@ -108,6 +117,10 @@ public class OffsetTable {
 
 	public Integer getVarOffset(String className, String variable) {
 		return items.get(className).getVarOffset(variable);
+	}
+
+	public Integer getMethodOffset(String className, String methodName) {
+		return items.get(className).getMethodOffset(methodName);
 	}
 
 	public void insertVar(String className, String itemName, Integer offset) {
