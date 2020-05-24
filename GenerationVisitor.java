@@ -164,8 +164,9 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	private String paramsAllocation(MethodInfo methodInfo) {
 		String localVariables = "";
 		for (Entry<String, String> entry : methodInfo.getParameters().getEntries() ) {
-			localVariables += "\t%" + entry.getKey() + " = alloca i32\n";
-			localVariables += "\tstore i32 %." + entry.getKey()+ ", i32* %" + 
+			String IRtype = getIRType(entry.getValue());
+			localVariables += "\t%" + entry.getKey() + " = alloca " + IRtype + "\n";
+			localVariables += "\tstore " + IRtype + " %." + entry.getKey()+ ", " + IRtype + "* %" + 
 					entry.getKey() + "\n";
 		}
 		return localVariables;
@@ -406,14 +407,14 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 				statementInfo.getCurMethodName());
 		n.f4.accept(this, statementInfo1);	
 		ifCode += statementInfo1.getCode();
-		ifCode += "\t" + "br label %" + endLabel + "\n";
+		ifCode += "\tbr label %" + endLabel + "\n";
 
 		ifCode += falseLabel + ":\n";
 		StatementInfo statementInfo2 = new StatementInfo(statementInfo.getClassInfo(), 
 				statementInfo.getCurMethodName());
 		n.f6.accept(this, statementInfo2);
 		ifCode += statementInfo2.getCode();
-		ifCode += "\t" + "br label %" + endLabel + "\n";
+		ifCode += "\tbr label %" + endLabel + "\n";
 		ifCode += endLabel + ":\n";
 
 		return ifCode;
@@ -427,13 +428,36 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	* f4 -> Statement()
 	*/
 	public Object visit(WhileStatement n, Object argu) {
+		StatementInfo statementInfo = (StatementInfo) argu;
+
+		String label1 = newLabel();
+		String label2 = newLabel();
+		String label3 = newLabel();
+
+		String whileCode = "\tbr label %" + label1 + "\n";
+		// start of loop
+		whileCode += label1 + ":\n";
+
+		// Check the condition
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
-		if (!exprInfo.getType().equals("boolean")) {
-			throw new RuntimeException(exprInfo.getType() + 
-				" cannot be converted to boolean in WhileStatement");		
-		}
-		n.f4.accept(this, argu);
-		return null;
+		whileCode += exprInfo.getCode();
+		whileCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + label2 + 
+				", label %" + label3 + "\n";
+
+		// Statements
+		whileCode += label2 + ":\n";
+		StatementInfo statementInfo1 = new StatementInfo(statementInfo.getClassInfo(),
+				statementInfo.getCurMethodName());
+		n.f4.accept(this, statementInfo1);
+		whileCode += statementInfo1.getCode();
+
+		// loop again
+		whileCode += "\tbr label %" + label1 + "\n";
+
+		// end of loop
+		whileCode += label3 + ":\n";
+
+		return whileCode;
 	}
 
    	/**
@@ -535,7 +559,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 
 		String plusCode = exprInfo.getCode() + exprInfo2.getCode();
 		plusCode += "\t" + result + " = " + " sub i32 " + exprInfo.getResult() +
-				", " + exprInfo2.getResult();
+				", " + exprInfo2.getResult() + "\n";
 
 		return new ExpressionInfo("", "int", "", result, plusCode);
 	 }
@@ -553,7 +577,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 
 		String plusCode = exprInfo.getCode() + exprInfo2.getCode();
 		plusCode += "\t" + result + " = " + " mul i32 " + exprInfo.getResult() +
-				", " + exprInfo2.getResult();
+				", " + exprInfo2.getResult() + "\n";
 
 		return new ExpressionInfo("", "int", "", result, plusCode);
 	}
@@ -627,11 +651,22 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	  */
 	 public Object visit(ArrayLength n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);
-		if (!exprInfo.getType().contains("[]")) {
-			throw new RuntimeException(exprInfo.toString() +
-				": length is only valid for arrays");
+		String type = exprInfo.getType();
+
+		String t1 = newTemp();
+		String result = newTemp();
+
+		String lengthCode = exprInfo.getCode();
+		if (type.equals("boolean[]")) {
+			lengthCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() + " to i32*";
 		}
-		return new ExpressionInfo("", "int", "");
+		else {
+			t1 = exprInfo.getResult();
+		}
+
+		lengthCode += "\t" + result + " = load i32, i32* " + t1 + "\n";
+
+		return new ExpressionInfo("", "int", "", result, lengthCode);
 	 }
   
 	 /**
@@ -675,7 +710,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		messageCode += "\t" + t5 + " = bitcast i8* " + t4 + " to " + getIRType(returnType) +
 				" (i8*" + getMethodArgsIRTypes(args) + ")*\n";
 		messageCode += "\t" + t6 + " = call " + getIRType(returnType) + " " + 
-				t5 + "(i8*" + exprInfo.getResult() + getMethodArgs(args) + ")\n";
+				t5 + "(i8* " + exprInfo.getResult() + getMethodArgs(args) + ")\n";
 
 		if (returnType.equals("boolean[]")) {
 			messageCode += "\t" + result + " = trunc i8 " + t6 + " to i1\n";
@@ -734,22 +769,38 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	public Object visit(NotExpression n, Object argu) {
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f1.accept(this, argu);
 
-		String t = newTemp();
+		// String result = newTemp();
+		// String btrue = newLabel();
+		// String bfalse = newLabel();
+		// String end = newLabel();
+
+		// String notCode = exprInfo.getCode();
+		// notCode += "br i1 " + exprInfo.getResult() + ", label %btrue, label %bfalse\n" ;
+		// notCode += btrue + ":\n";
+		// notCode += "\t" + result + " = add i1 0, 0\n";
+		// notCode += "\tbr label %end\n";
+		// notCode += bfalse + ":\n";
+		// notCode += "\t" + result + " = add i1 1, 0\n";
+		// notCode += "\tbr label %end\n";
+		// notCode += end + ":\n";
+
 		String result = newTemp();
-		String btrue = newLabel();
-		String bfalse = newLabel();
-		String end = newLabel();
+		String trueLabel = newLabel();
+		String falseLabel = newLabel();
+		String endLabel = newLabel();
 
 		String notCode = exprInfo.getCode();
-		notCode += t + " = icmp eq i32 " + exprInfo.getResult() + ", 1\n";
-		notCode += "br i1 " + t + ", label %btrue, label %bfalse\n" ;
-		notCode += btrue + ":\n";
-		notCode += "\t" + result + " = add i32 0, 0\n";
-		notCode += "\tbr label %end\n";
-		notCode += bfalse + ":\n";
-		notCode += "\t" + result + " = add i32 1, 0\n";
-		notCode += "  br label %end\n";
-		notCode += end + ":\n";
+		notCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + trueLabel + 
+				", label %" + falseLabel + "\n";
+		notCode += trueLabel + ":\n";
+		notCode += "\tbr label %" + endLabel + "\n";
+
+		notCode += falseLabel + ":\n";
+		notCode += "\tbr label %" + endLabel + "\n";
+
+		notCode += endLabel + ":\n";
+		notCode += "\t" + result + " = phi i1 [0, %" + trueLabel +"], [1, %" +
+				falseLabel + "]\n";
 
 		exprInfo.setResult(result);
 		exprInfo.setCode(notCode);
@@ -809,7 +860,8 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 			return new ExpressionInfo(variable, type, "", result, idCode);
 		}
 		else if (n.f0.which == 4) {
-			return new ExpressionInfo("", statementInfo.getName(), "this", "TODO", "TODOCODE");
+			return new ExpressionInfo("", statementInfo.getName(), "this", "%this",
+					"");
 		}
 		else if (n.f0.which == 6) {
 			ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);

@@ -72,32 +72,35 @@ L4:
 
 	%_22 = load i32*, i32** %x
 	%_24 = load i32, i32* %_22
-	%_25 = icmp sge i32 0, 0
-	%_26 = icmp slt i32 0, %_24
-	%_27 = and i1 %_25, %_26
-	br i1 %_27, label %L6, label %L7
+	%_25 = load i32*, i32** %x
+	%_27 = load i32, i32* %_25
+	%_28 = icmp sge i32 0, 0
+	%_29 = icmp slt i32 0, %_27
+	%_30 = and i1 %_28, %_29
+	br i1 %_30, label %L6, label %L7
 L7:
 	call void @throw_oob()
 	br label %L6
 L6:
-	%_28 = add i32 1, 0
-	%_29 = getelementptr i32, i32* %_22, i32 %_28
-	%_30 = load i32, i32* %_29
-	%_32 = load i32*, i32** %x
-	%_34 = load i32, i32* %_32
-	%_35 = icmp sge i32 1, 0
-	%_36 = icmp slt i32 1, %_34
-	%_37 = and i1 %_35, %_36
-	br i1 %_37, label %L8, label %L9
+	%_31 = add i32 1, 0
+	%_32 = getelementptr i32, i32* %_25, i32 %_31
+	%_33 = load i32, i32* %_32
+	%_35 = load i32*, i32** %x
+	%_37 = load i32, i32* %_35
+	%_38 = icmp sge i32 1, 0
+	%_39 = icmp slt i32 1, %_37
+	%_40 = and i1 %_38, %_39
+	br i1 %_40, label %L8, label %L9
 L9:
 	call void @throw_oob()
 	br label %L8
 L8:
-	%_38 = add i32 1, 1
-	%_39 = getelementptr i32, i32* %_32, i32 %_38
-	%_40 = load i32, i32* %_39
-	%_42 = add i32 %_30, %_40
-	call void (i32) @print_int(i32 %_42)
+	%_41 = add i32 1, 1
+	%_42 = getelementptr i32, i32* %_35, i32 %_41
+	%_43 = load i32, i32* %_42
+	%_45 = add i32 %_33, %_43
+	%_46 = add i32 %_24, %_45
+	call void (i32) @print_int(i32 %_46)
 
 	ret i32 0
 }

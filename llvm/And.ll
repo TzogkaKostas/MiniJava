@@ -37,29 +37,50 @@ define i32 @main() {
 	store i1 1, i1* %c
 
 	%_0 = load i1, i1* %b
-	br i1 %_0, label %L1, label %L0
+	br i1 %_0, label %L0, label %L1
 L0:
-	br label %L3
+	br label %L2
 L1:
-	%_1 = load i1, i1* %c
 	br label %L2
 L2:
-	br label %L3
+	%_1 = phi i1 [0, %L0], [1, %L1]
+	br i1 %_1, label %L3, label %L4
 L3:
-	%_2 = phi i1 [0, %L0], [%_1, %L2]
-	br i1 %_2, label %L4, label %L5
+	br label %L5
 L4:
+	br label %L5
+L5:
+	%_2 = phi i1 [0, %L3], [1, %L4]
+	br i1 %_2, label %L6, label %L7
+L6:
+	br label %L8
+L7:
+	br label %L8
+L8:
+	%_3 = phi i1 [0, %L6], [1, %L7]
+	br i1 %_3, label %L10, label %L9
+L9:
+	br label %L12
+L10:
+	%_4 = load i1, i1* %c
+	br label %L11
+L11:
+	br label %L12
+L12:
+	%_5 = phi i1 [0, %L9], [%_4, %L11]
+	br i1 %_5, label %L13, label %L14
+L13:
 	store i32 0, i32* %x
 
-	br label %L6
-L5:
+	br label %L15
+L14:
 	store i32 1, i32* %x
 
-	br label %L6
-L6:
+	br label %L15
+L15:
 
-	%_3 = load i32, i32* %x
-	call void (i32) @print_int(i32 %_3)
+	%_6 = load i32, i32* %x
+	call void (i32) @print_int(i32 %_6)
 
 	ret i32 0
 }

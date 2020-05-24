@@ -6,6 +6,7 @@ class Arrays {
         x[0] = 1;
         x[1] = 2;
 
-	    System.out.println((x[0]) + (x[1]));
+		// System.out.println((x[0]) + (x[1]));
+	    System.out.println((x.length) + ((x[0]) + (x[1])));
 	}
 }

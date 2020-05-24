@@ -1,8 +1,8 @@
 #!/bin/sh
 
 args="";
-for file in $1*; do
+for file in $2*; do
     args=$args" "$file;
 done
-make
+make $1
 java Main $args
