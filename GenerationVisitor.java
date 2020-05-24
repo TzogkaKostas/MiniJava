@@ -20,7 +20,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		this.codeBuffer = "";
 		this.regCount = 0;
 		this.labelCount = 0;
-		this.types = Map.of("boolean[]", "i8*", "boolean", "i8", "int[]", "i32*", "int", "i32");
+		this.types = Map.of("boolean[]", "i8*", "boolean", "i1", "int[]", "i32*", "int", "i32");
 	}
 
 	public SymbolTable getSymbolTable() {
@@ -250,6 +250,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 	*/
 	public Object visit(AssignmentStatement n, Object argu) {
 		StatementInfo statementInfo = (StatementInfo) argu;
+
 		String identifier = (String) n.f0.accept(this, statementInfo);
 		String type = statementInfo.getType(identifier);
 
@@ -269,7 +270,41 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		else {
 			assignmentCode += "\tstore " + getIRType(type) + " " + exprInfo.getResult() +
 					", " + getIRType(type) + "* %" + identifier + "\n";
+		
 		}
+
+		// String t1 = newTemp();
+		// String t2 = newTemp();
+		// String t3 = newTemp();
+
+		// String storedVarName;
+		// if (statementInfo.isClassVariable(identifier)) {
+		// 	Integer varOffset = getVarOffset(statementInfo.getClassInfo(), identifier);
+		// 	assignmentCode += "\t" + t1 + " = getelementptr i8, i8* %this, i32 " +
+		// 			varOffset + "\n";
+		// 	if (type.equals("int")) {
+		// 		assignmentCode += "\t" + t2 + " = bitcast i8* " + t1 + " to i32*\n";
+		// 	}
+		// 	storedVarName = t2;
+		// }
+		// else {
+		// 	storedVarName = "%" + identifier;
+		// }
+
+		// String exprIRtype;
+		// // if (type.equals("int")) {
+		// // 	t3 = exprInfo.getResult();
+		// // 	exprIRtype = "i32";
+		// // }
+		// // else {
+		// // 	assignmentCode += "\t" + t3 + " = zext i1 " + exprInfo.getResult() + " to i8\n";
+		// // 	exprIRtype = "i8";
+		// // }
+		// exprIRtype = getIRType(type);
+
+		// assignmentCode += "\tstore " + exprIRtype + " " + t3 + ", " + exprIRtype +
+		// 		"* " + storedVarName + "\n";
+
 		return assignmentCode;
 	}
 
@@ -289,6 +324,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String type = statementInfo.getType(identifier);
 
 		ExpressionInfo exprInfo1 = (ExpressionInfo) n.f2.accept(this, statementInfo);
+		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
 
 		String t0 = newTemp();
 		String t1 = newTemp();
@@ -298,6 +334,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t5 = newTemp();
 		String t6 = newTemp();
 		String t7 = newTemp();
+		String t8 = newTemp();
 		String label1 = newLabel();
 		String label2 = newLabel();
 
@@ -323,13 +360,22 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		arrayCode += label1 + ":\n";
 		String lengthIndex = type.equals("boolean[]") ? "4" : "1";
 		arrayCode += "\t" + t6 + " = add i32 " + lengthIndex + ", " + exprInfo1.getResult() + "\n";
-		arrayCode += "\t" + t7 + " = getelementptr " + typeOfPointer(getIRType(type)) + ", " + getIRType(type) + 
-				" " + t0 + ", i32 " + t6 + "\n";
 
-		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f5.accept(this, statementInfo);
-		arrayCode += exprInfo2.getCode() + "\tstore " + getIRType(exprInfo2.getType()) +
-				" " + exprInfo2.getResult() + ", " + getIRType(exprInfo2.getType()) +
-				"* " + t7 + "\n";
+		String exprIRtype;
+		if (type.equals("int[]")) {
+			t7 = exprInfo2.getResult();
+			exprIRtype = "i32";
+		}
+		else {
+			arrayCode += exprInfo2.getCode() + "\t" + t7 + " = zext i1 " + 
+					exprInfo2.getResult() + " to i8";
+			exprIRtype = "i8";
+		}
+
+		arrayCode += "\t" + t8 + " = getelementptr " + exprIRtype + ", " + exprIRtype + 
+				"* " + t0 + ", i32 " + t6 + "\n";
+		arrayCode += "\tstore " + exprIRtype + " " + exprInfo2.getResult() + ", " +
+				exprIRtype + "* " + t8 + "\n";
 
 		return arrayCode;
 	}
@@ -523,7 +569,6 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String type1 = exprInfo.getType();
 
 		ExpressionInfo exprInfo2 = (ExpressionInfo) n.f2.accept(this, argu);
-		// String type2 = exprInfo2.getType();
 
 		String t1 = newTemp();
 		String t2 = newTemp();
@@ -533,6 +578,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t6 = newTemp();
 		String t7 = newTemp();
 		String t8 = newTemp();
+		String result = newTemp();
 		String label1 = newLabel();
 		String label2 = newLabel();
 
@@ -556,13 +602,22 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		lookupCode += "\tbr label %" + label1 + "\n";
 		lookupCode += label1 + ":\n";
 		lookupCode += "\t" + t6 + " = add i32 1, " + exprInfo2.getResult() + "\n";
-		lookupCode += "\t" + t7 + " = getelementptr " + typeOfPointer(getIRType(type1)) + ", " +
-				getIRType(type1) + " " + exprInfo.getResult() + ", i32 " + t6 + "\n";
-		lookupCode += "\t" + t8 + " = load " + typeOfPointer(getIRType(type1)) + ", " + 
-				getIRType(type1) + " " + t7 + "\n";
 
-		return new ExpressionInfo("", type1.substring(0, type1.indexOf('[')), "",
-				t8, lookupCode);
+		String elementType = type1.equals("boolean[]") ? "i8" : "i32";
+		lookupCode += "\t" + t7 + " = getelementptr " + elementType + ", " +
+				elementType + "* " + exprInfo.getResult() + ", i32 " + t6 + "\n";
+		lookupCode += "\t" + t8 + " = load " + elementType + ", " + 
+				elementType + "* " + t7 + "\n";
+
+		if (type1.equals("boolean[]")) {
+			lookupCode += "\t" + result + " = trunc i8 " + t8 + " to i1\n";
+		}
+		else {
+			result = t8;
+		}
+
+		return new ExpressionInfo("", type1.substring(0, type1.indexOf('[')), 
+				"", result, lookupCode);
 	 }
   
 	 /**
@@ -607,6 +662,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t4 = newTemp();
 		String t5 = newTemp();
 		String t6 = newTemp();
+		String result = newTemp();
 
 		String messageCode = exprInfo.getCode() + getMethodArgsCode(args);
 		messageCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() +
@@ -621,7 +677,13 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		messageCode += "\t" + t6 + " = call " + getIRType(returnType) + " " + 
 				t5 + "(i8*" + exprInfo.getResult() + getMethodArgs(args) + ")\n";
 
-		return new ExpressionInfo("", returnType, "", t6, messageCode);
+		if (returnType.equals("boolean[]")) {
+			messageCode += "\t" + result + " = trunc i8 " + t6 + " to i1\n";
+		}
+		else {
+			result = t6;
+		}
+		return new ExpressionInfo("", returnType, "", result, messageCode);
 	}
   
 	/**
@@ -713,14 +775,15 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		}
 		else if (n.f0.which == 1 || n.f0.which == 2) {
 			String booleanLiteral = (String) n.f0.accept(this, null);
-			String value = (booleanLiteral == "true" ? "1" : "0");
-			return new ExpressionInfo("", "boolean", booleanLiteral, value, "");
+			String booleanValue = (booleanLiteral == "true" ? "1" : "0");
+			return new ExpressionInfo("", "boolean", booleanLiteral, booleanValue, "");
 		}
 		else if (n.f0.which == 3) {
 			String variable = (String) n.f0.accept(this, null);
 			String type = statementInfo.getType(variable);
 
 			String result = newTemp();
+
 			String idCode;
 			if (statementInfo.isClassVariable(variable)) {
 				String t1 = newTemp();
@@ -735,10 +798,18 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 				idCode = "\t" + result + " = load " + getIRType(type) + ", " +
 						getIRType(type) + "* %" + variable + "\n";	
 			}
+
+			// if (type.equals("boolean")) {
+			// 	idCode += "\t" + result + " = trunc i8 " + t3 + " to i1\n";
+			// }
+			// else {
+			// 	result = t3;
+			// }
+
 			return new ExpressionInfo(variable, type, "", result, idCode);
 		}
 		else if (n.f0.which == 4) {
-			return new ExpressionInfo("", statementInfo.getName(), "this", "TODO");
+			return new ExpressionInfo("", statementInfo.getName(), "this", "TODO", "TODOCODE");
 		}
 		else if (n.f0.which == 6) {
 			ExpressionInfo exprInfo = (ExpressionInfo) n.f0.accept(this, argu);

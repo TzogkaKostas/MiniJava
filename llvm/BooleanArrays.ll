@@ -30,7 +30,6 @@ define void @throw_nsz() {
 
 define i32 @main() {
 	%b = alloca i8*
-	%b2 = alloca i8
 	%_0 = add i32 4, 10
 	%_1 = icmp sge i32 %_0, 4
 	br i1 %_1, label %L0, label %L1
@@ -42,8 +41,6 @@ L0:
 	%_3 = bitcast i8* %_2 to i32*
 	store i32 10, i32* %_3
 	store i8* %_2, i8** %b
-
-	store i8 1, i8* %b2
 
 	%_4 = load i8*, i8** %b
 	%_5 = bitcast i8* %_4 to i32*
@@ -57,9 +54,35 @@ L3:
 	br label %L2
 L2:
 	%_10 = add i32 4, 0
-	%_11 = getelementptr i8, i8* %_4, i32 %_10
-	%_12 = load i8, i8* %b2
-	store i8 %_12, i8* %_11
+	%_11 = zext i1 1 to i8	%_12 = getelementptr i8, i8* %_4, i32 %_10
+	store i8 1, i8* %_12
+
+	%_13 = load i8*, i8** %b
+	%_14 = bitcast i8* %_13 to i32*	%_15 = load i32, i32* %_14
+	%_16 = icmp sge i32 1, 0
+	%_17 = icmp slt i32 1, %_15
+	%_18 = and i1 %_16, %_17
+	br i1 %_18, label %L4, label %L5
+L5:
+	call void @throw_oob()
+	br label %L4
+L4:
+	%_19 = add i32 1, 1
+	%_20 = getelementptr i8, i8* %_13, i32 %_19
+	%_21 = load i8, i8* %_20
+	%_22 = trunc i8 %_21 to i1
+	br i1 %_22, label %L6, label %L7
+L6:
+	call void (i32) @print_int(i32 1)
+
+
+	br label %L8
+L7:
+	call void (i32) @print_int(i32 2)
+
+
+	br label %L8
+L8:
 
 	ret i32 0
 }

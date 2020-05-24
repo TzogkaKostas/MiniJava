@@ -31,8 +31,10 @@ define void @throw_nsz() {
 define i32 @main() {
 	%x = alloca i32
 	store i32 10, i32* %x
-	%_0 = load i32, i32* %x
-	call void (i32) @print_int(i32 %_0)
+
+	%_3 = load i32, i32* %x
+	call void (i32) @print_int(i32 %_3)
+
 	ret i32 0
 }
 
