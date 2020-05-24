@@ -703,9 +703,9 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		messageCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() +
 				" to i8***\n";
 		messageCode += "\t" + t2 + " = load i8**, i8*** " + t1 + "\n";
+		Integer methodOffset = getMethodOffset(symbolTable.getClassInfo(exprInfo.getType()), methodName);
 		messageCode += "\t" + t3 + " = getelementptr i8*, i8** " + t2 + ", i32 " + 
-				getMethodOffset(symbolTable.getClassInfo(exprInfo.getType()),
-				methodName) + "\n";
+				methodOffset/8 + "\n";
 		messageCode += "\t" + t4 + " = load i8*, i8** " + t3 + "\n";
 		messageCode += "\t" + t5 + " = bitcast i8* " + t4 + " to " + getIRType(returnType) +
 				" (i8*" + getMethodArgsIRTypes(args) + ")*\n";
