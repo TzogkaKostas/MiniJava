@@ -1,6 +1,6 @@
 class BubbleSort{
     public static void main(String[] a){
-	System.out.println(new BBS().Start(10));
+		System.out.println(new BBS().Start(10));
     }
 }
 
@@ -41,7 +41,6 @@ class BBS{
 	aux02 = 0 - 1 ;
 	while (aux02 < i) {
 	    j = 1 ;
-	    //aux03 = i+1 ;
 	    while (j < (i+1)){
 		aux07 = j - 1 ;
 		aux04 = number[aux07] ;
