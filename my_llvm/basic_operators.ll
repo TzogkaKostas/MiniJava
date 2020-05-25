@@ -74,12 +74,12 @@ define i32 @main() {
 	%_24 = load i8*, i8** %_23
 	%_25 = bitcast i8* %_24 to i32 (i8*)*
 	%_26 = call i32 %_25(i8* %_18)
-	%_28 = mul i32 1, %_26
-	%_29 = mul i32 %_28, 3
-	%_30 = load i32, i32* %i
-	%_31 = sub i32 %_29, %_30
-	%_32 = add i32 %_31, 20
-	call void (i32) @print_int(i32 %_32)
+	%_27 = mul i32 1, %_26
+	%_28 = mul i32 %_27, 3
+	%_29 = load i32, i32* %i
+	%_30 = sub i32 %_28, %_29
+	%_31 = add i32 %_30, 20
+	call void (i32) @print_int(i32 %_31)
 
 	ret i32 0
 }

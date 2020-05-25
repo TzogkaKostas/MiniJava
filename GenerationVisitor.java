@@ -238,7 +238,14 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, statementInfo);
 		String assignmentCode = exprInfo.getCode();
-		if (!statementInfo.isLocalVariable(identifier)) {
+
+		// check if identifier is local variable or member field
+		// in case of member field, variable's address needs to be found
+		if (statementInfo.isLocalVariable(identifier)) {
+			assignmentCode += "\tstore " + getIRType(type) + " " + exprInfo.getResult() +
+					", " + getIRType(type) + "* %" + identifier + "\n";
+		}
+		else {
 			String t1 = newTemp();
 			String t2 = newTemp();
 			Integer varOffset = getVarOffset(statementInfo.getClassInfo(), identifier) + 8;
@@ -248,11 +255,6 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 					getIRType(type) + "*\n";
 			assignmentCode += "\tstore " + getIRType(type) + " " +
 					exprInfo.getResult() + ", " + getIRType(type) + "* " + t2 + "\n";
-		}
-		else {
-			assignmentCode += "\tstore " + getIRType(type) + " " + exprInfo.getResult() +
-					", " + getIRType(type) + "* %" + identifier + "\n";
-		
 		}
 
 		return assignmentCode;
@@ -290,8 +292,14 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String label1 = newLabel();
 		String label2 = newLabel();
 
+		// check if identifier is local variable or member field
+		// in case of member field, variable's address needs to be found
 		String arrayCode = exprInfo1.getCode();
-		if (!statementInfo.isLocalVariable(identifier)) {
+		if (statementInfo.isLocalVariable(identifier)) {
+			arrayCode += "\t" + t0 + " = load " + getIRType(type) + ", " + 
+					getIRType(type) + "* %" + identifier + "\n";
+		}
+		else {
 			Integer varOffset = getVarOffset(statementInfo.getClassInfo(), identifier) + 8;
 			arrayCode += "\t" + t000 + " = getelementptr i8, i8* %this, i32 " +
 					varOffset + "\n";
@@ -300,11 +308,9 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 			arrayCode += "\t" + t0 + " = load " + getIRType(type) + ", " + 
 					getIRType(type) + "* " + t00 + "\n";
 		}
-		else {
-			arrayCode += "\t" + t0 + " = load " + getIRType(type) + ", " + 
-					getIRType(type) + "* %" + identifier + "\n";
-		}
-		
+
+		// bitcast to i32* is needed on boolean arrays, because length is stored in the
+		// first 4 positions/bytes	
 		if (type.equals("boolean[]")) {
 			arrayCode += "\t" + t1 + " = bitcast i8* " + t0 + " to i32*\n";
 		}
@@ -312,18 +318,33 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 			t1 = t0;
 		}
 
+		// get array's element and load it on a register 
+
+		// load array's length
 		arrayCode += "\t" + t2 + " = load i32, i32* " + t1 + "\n";
+
+		// check if index is greater or equal to 0
 		arrayCode += "\t" + t3 + " = icmp sge i32 " + exprInfo1.getResult() +
 				", 0\n";
+
+		// check if index is less than array's length
 		arrayCode += "\t" + t4 + " = icmp slt i32 " + exprInfo1.getResult() +
 				", " + t2 + "\n";
+
+		// check if both conditions are true
 		arrayCode += "\t" + t5 + " = and i1 " + t4 + ", " + t5 + "\n";
 		arrayCode += "\tbr i1 " + t5 + ", label %" + label1 + ", label %" + 
 				label2 + "\n";
+
+		// throw out of bounds exception
 		arrayCode += label2 + ":\n";
 		arrayCode += "\tcall void @throw_oob()\n";
 		arrayCode += "\tbr label %" + label1 + "\n";
+
+		// array's index is valid
 		arrayCode += label1 + ":\n";
+
+		// add length's positions to the index
 		String lengthIndex = type.equals("boolean[]") ? "4" : "1";
 		arrayCode += "\t" + t6 + " = add i32 " + lengthIndex + ", " + 
 				exprInfo1.getResult() + "\n";
@@ -335,6 +356,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 			exprIRtype = "i32";
 		}
 		else {
+			// zext to i8 on i1 expressions is needed for boolean storing 
 			arrayCode += "\t" + t7 + " = zext i1 " + exprInfo2.getResult() + " to i8\n";
 			exprIRtype = "i8";
 		}
@@ -364,10 +386,12 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String falseLabel = newLabel();
 		String endLabel = newLabel();
 	
+		// check the conditions
 		String ifCode = exprInfo.getCode();
 		ifCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + 
 				trueLabel + ", label %" + falseLabel + "\n";
 
+		// 'if' statements
 		ifCode += trueLabel + ":\n";
 		StatementInfo statementInfo1 = new StatementInfo(statementInfo.getClassInfo(),
 				statementInfo.getCurMethodName());
@@ -375,12 +399,14 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		ifCode += statementInfo1.getCode();
 		ifCode += "\tbr label %" + endLabel + "\n";
 
+		// 'else' statements
 		ifCode += falseLabel + ":\n";
 		StatementInfo statementInfo2 = new StatementInfo(statementInfo.getClassInfo(), 
 				statementInfo.getCurMethodName());
 		n.f6.accept(this, statementInfo2);
 		ifCode += statementInfo2.getCode();
 		ifCode += "\tbr label %" + endLabel + "\n";
+
 		ifCode += endLabel + ":\n";
 
 		return ifCode;
@@ -404,13 +430,13 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		// start of loop
 		whileCode += label1 + ":\n";
 
-		// Check the condition
+		// check the condition
 		ExpressionInfo exprInfo = (ExpressionInfo) n.f2.accept(this, argu);
 		whileCode += exprInfo.getCode();
 		whileCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + label2 + 
 				", label %" + label3 + "\n";
 
-		// Statements
+		// statements
 		whileCode += label2 + ":\n";
 		StatementInfo statementInfo1 = new StatementInfo(statementInfo.getClassInfo(),
 				statementInfo.getCurMethodName());
@@ -457,18 +483,23 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String endLabel = newLabel();
 		String result = newTemp();
 
+		// check the first clause
 		String andCode = exprInfo.getCode();
 		andCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + falseLabel + 
 				", label %" + trueLabel + "\n";
+
+		// if the first clause is false return false
 		andCode += trueLabel + ":\n";
 		andCode += "\tbr label %" + endLabel + "\n";
 
+		// else return value of the second clause
 		andCode += falseLabel + ":\n";
 		andCode += exprInfo2.getCode();
 		andCode += "\tbr label %" + endFalseLabel + "\n";
 		andCode += endFalseLabel + ":\n";
 		andCode += "\tbr label %" + endLabel + "\n";
 
+		// phi statement
 		andCode += endLabel + ":\n";
 		andCode += "\t" + result + " = phi i1 [0, %" + trueLabel +"], [" + exprInfo2.getResult() +
 				", %" + endFalseLabel + "]\n";
@@ -572,6 +603,8 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String label1 = newLabel();
 		String label2 = newLabel();
 
+		// bitcast to i32* is needed on boolean arrays, because length is stored in the
+		// first 4 positions/bytes
 		String lookupCode = exprInfo.getCode() + exprInfo2.getCode();
 		if (type1.equals("boolean[]")) {
 			lookupCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() + " to i32*\n";
@@ -580,27 +613,44 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 			t1 = exprInfo.getResult();
 		}
 
+		// load array's length
 		lookupCode += "\t" + t2 + " = load i32, i32* " + t1 + "\n";
+
+		// check if index is greater or equal to 0
 		lookupCode += "\t" + t3 + " = icmp sge i32 " + exprInfo2.getResult() + ", 0\n";
+
+		// check if index is less than array's length
 		lookupCode += "\t" + t4 + " = icmp slt i32 " + exprInfo2.getResult() + ", " +
 				t2 + "\n";
+		
+		// check if both conditions are true
 		lookupCode += "\t" + t5 + " = and i1 " + t3 + ", " + t4 + "\n";
 		lookupCode += "\tbr i1 " + t5 + ", label %" + label1 + ", label %" +
 				label2 + "\n";
+		
+		// throw out of bounds exception
 		lookupCode += label2 + ":\n";
 		lookupCode += "\tcall void @throw_oob()\n";
 		lookupCode += "\tbr label %" + label1 + "\n";
+
+		// array's index is valid
 		lookupCode += label1 + ":\n";
+
+		// positions allocated for array's length
 		String lengthIndex = type1.equals("boolean[]") ? "4" : "1";
+
+		// add length's positions to the index
 		lookupCode += "\t" + t6 + " = add i32 " + lengthIndex  + ", " +
 				exprInfo2.getResult() + "\n";
 
+		// get array's element and load it on a register 
 		String elementType = type1.equals("boolean[]") ? "i8" : "i32";
 		lookupCode += "\t" + t7 + " = getelementptr " + elementType + ", " +
 				elementType + "* " + exprInfo.getResult() + ", i32 " + t6 + "\n";
 		lookupCode += "\t" + t8 + " = load " + elementType + ", " + 
 				elementType + "* " + t7 + "\n";
 
+		// trunc is needed on boolean arrays, to truncate elements to i1
 		if (type1.equals("boolean[]")) {
 			lookupCode += "\t" + result + " = trunc i8 " + t8 + " to i1\n";
 		}
@@ -624,6 +674,8 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t1 = newTemp();
 		String result = newTemp();
 
+		// bitcast to i32* is needed on boolean arrays, because length is stored in the
+		// first 4 positions/bytes
 		String lengthCode = exprInfo.getCode();
 		if (type.equals("boolean[]")) {
 			lengthCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() + " to i32*";
@@ -664,30 +716,33 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t3 = newTemp();
 		String t4 = newTemp();
 		String t5 = newTemp();
-		String t6 = newTemp();
 		String result = newTemp();
 
+		// generate code for each argument
 		String messageCode = exprInfo.getCode() + getMethodArgsCode(args);
+
+		// get object's v_table
 		messageCode += "\t" + t1 + " = bitcast i8* " + exprInfo.getResult() +
 				" to i8***\n";
 		messageCode += "\t" + t2 + " = load i8**, i8*** " + t1 + "\n";
-		Integer methodOffset = getMethodOffset(symbolTable.getClassInfo(exprInfo.getType()), methodName);
+
+		// get object's method from the v_table
+		Integer methodOffset =
+				getMethodOffset(symbolTable.getClassInfo(exprInfo.getType()), methodName);
 		messageCode += "\t" + t3 + " = getelementptr i8*, i8** " + t2 + ", i32 " + 
 				methodOffset/8 + "\n";
+
+		// load method's pointer on a register 
 		messageCode += "\t" + t4 + " = load i8*, i8** " + t3 + "\n";
+
+		// bitcast it 
 		messageCode += "\t" + t5 + " = bitcast i8* " + t4 + " to " + getIRType(returnType) +
 				" (i8*" + getMethodArgsIRTypes(args) + ")*\n";
-		messageCode += "\t" + t6 + " = call " + getIRType(returnType) + " " + 
+
+		// call the method
+		messageCode += "\t" + result + " = call " + getIRType(returnType) + " " + 
 				t5 + "(i8* " + exprInfo.getResult() + getMethodArgs(args) + ")\n";
 
-		// if (returnType.equals("boolean")) {
-			// messageCode += "\t" + result + " = trunc i8 " + t6 + " to i1\n";
-		// }
-		// else {
-			// result = t6;
-		// }
-		result = t6;
-		//
 
 		return new ExpressionInfo("", returnType, "", result, messageCode);
 	}
@@ -746,14 +801,18 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String endLabel = newLabel();
 
 		String notCode = exprInfo.getCode();
+
+		// check clause's value
 		notCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + trueLabel + 
 				", label %" + falseLabel + "\n";
+		
 		notCode += trueLabel + ":\n";
 		notCode += "\tbr label %" + endLabel + "\n";
 
 		notCode += falseLabel + ":\n";
 		notCode += "\tbr label %" + endLabel + "\n";
 
+		// return false if clause is true and true if clause is false
 		notCode += endLabel + ":\n";
 		notCode += "\t" + result + " = phi i1 [0, %" + trueLabel +"], [1, %" +
 				falseLabel + "]\n";
@@ -778,11 +837,13 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 
 		if (n.f0.which == 0) {
 			String integerLiteral = (String) n.f0.accept(this, null);
+			// just return the literal, no code generation is needed
 			return new ExpressionInfo("", "int", integerLiteral, integerLiteral, "");
 		}
 		else if (n.f0.which == 1 || n.f0.which == 2) {
 			String booleanLiteral = (String) n.f0.accept(this, null);
 			String booleanValue = (booleanLiteral == "true" ? "1" : "0");
+			// just return the literal, no code generation is needed
 			return new ExpressionInfo("", "boolean", booleanLiteral, booleanValue, "");
 		}
 		else if (n.f0.which == 3) {
@@ -792,18 +853,23 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 			String result = newTemp();
 
 			String idCode;
-			if (!statementInfo.isLocalVariable(variable)) {
+			// check if identifier is local variable or member field
+			// in case of member field, variable's address needs to be found
+			if (statementInfo.isLocalVariable(variable)) {
+				idCode = "\t" + result + " = load " + getIRType(type) + ", " +
+						getIRType(type) + "* %" + variable + "\n";	
+
+			} else {
 				String t1 = newTemp();
 				String t2 = newTemp();
-				Integer varOffset = getVarOffset(statementInfo.getClassInfo(), variable) + 8;
 
+				// v_table pointer is stored on object's first 8 bytes
+				// so we need to add 8 to object's pointer
+				Integer varOffset = getVarOffset(statementInfo.getClassInfo(), variable) + 8;
 				idCode = "\t" + t1 + " = getelementptr i8, i8* %this, i32 " + varOffset + "\n";
 				idCode += "\t" + t2 + " = bitcast i8* " + t1 + " to " + getIRType(type) + "*\n";
 				idCode += "\t" + result + " = load " + getIRType(type) + ", " +
 						getIRType(type) + "* " + t2 + "\n";
-			} else {
-				idCode = "\t" + result + " = load " + getIRType(type) + ", " +
-						getIRType(type) + "* %" + variable + "\n";	
 			}
 
 			return new ExpressionInfo(variable, type, "", result, idCode);
@@ -862,19 +928,29 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String label2 = newLabel();
 
 		String boolArrayCode = exprInfo.getCode();
+
+		// we need 4 more positions/bytes for array's length
 		boolArrayCode += "\t" + t1 + " = add i32 4, " + exprInfo.getResult() + "\n";
+
+		// check if allocation size is greater or equal than 4
 		boolArrayCode += "\t" + t2 + " = icmp sge i32 " + t1 + ", 4\n";
 		boolArrayCode += "\tbr i1 " + t2 + ", label %" + label1 + ", label %" + 
 				label2 + "\n";
+
+		// if allocation size is negative, throw negative size
 		boolArrayCode += label2 + ":\n";
 		boolArrayCode += "\tcall void @throw_nsz()\n";
 		boolArrayCode += "\tbr label %" + label1 + "\n";
 	
+		// allocate bytes by calling calloc
 		boolArrayCode += label1 + ":\n";
 		boolArrayCode += "\t" + t3 + " = call i8* @calloc(i32 1, i32 " + t1 + ")\n";
 		boolArrayCode += "\t" + t4 + " = bitcast i8* " + t3 + " to i32*\n";
+
+		// store array's length
 		boolArrayCode += "\tstore i32 " + exprInfo.getResult() + ", i32* " + t4 + "\n";
 
+		// return calloc's return value
 		return new ExpressionInfo("new", "boolean[]", "", t3, boolArrayCode);
 	}
 
@@ -896,17 +972,28 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String label2 = newLabel();
 
 		String intArrayCode = exprInfo.getCode();
+
+		// we need 1 more position (4 bytes) for array's length
 		intArrayCode += "\t" + t1 + " = add i32 1, " + exprInfo.getResult() + "\n";
+
+		// check if allocation size is greater or equal than 1
 		intArrayCode += "\t" + t2 + " = icmp sge i32 " + t1 + ", 1\n";
 		intArrayCode += "\tbr i1 " + t2 + ", label %" + label1 + ", label %" + label2 + "\n";
+
+		// if allocation size is negative, throw negative size
 		intArrayCode += label2 + ":\n";
 		intArrayCode += "\tcall void @throw_nsz()\n";
 		intArrayCode += "\tbr label %" + label1 + "\n";
+
+		// allocate bytes by calling calloc
 		intArrayCode += label1 + ":\n";
 		intArrayCode += "\t" + t3 + " = call i8* @calloc(i32 " + t1 + ", i32 4)\n";
 		intArrayCode += "\t" + t4 + " = bitcast i8* " + t3 + " to i32*\n";
+
+		// store array's length
 		intArrayCode += "\t" + "store i32 " + exprInfo.getResult() + ", i32* " + t4 + "\n";
 	
+		// return calloc's return value
 		return new ExpressionInfo("new", "int[]", "", t4, intArrayCode);
    	}
 
@@ -926,10 +1013,17 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t3 = newTemp();
 
 		String allocationCode;
+		// allocate the needed memory for object
 		allocationCode = "\t" + t1 + " = call i8* @calloc(i32 1, i32 " + size + ")\n";
+
+		// bitcast is needed because object's v_table needs to be stored
 		allocationCode += "\t" + t2 + " = bitcast i8* " + t1 + " to i8***\n";
+
+		// get object's v_table
 		allocationCode += "\t" + t3 + " = getelementptr [" + numOfMethods + " x i8*], [" + 
 				numOfMethods + " x i8*]* @." + identifier + "_vtable, i32 0, i32 0\n";
+		
+		// store the pointer at object's first 8 bytes
 		allocationCode += "\tstore i8** " + t3 + ", i8*** " + t2 + "\n";
 
 		return new ExpressionInfo("new", identifier, "", t1, allocationCode);

@@ -63,31 +63,31 @@ define i32 @A.foo(i8* %this) {
 
 	br label %L0
 L0:
-	%_11 = load i32, i32* %a
-	%_12 = icmp slt i32 %_11, 4
-	br i1 %_12, label %L1, label %L2
+	%_10 = load i32, i32* %a
+	%_11 = icmp slt i32 %_10, 4
+	br i1 %_11, label %L1, label %L2
 L1:
-	%_13 = load i32, i32* %a
-	%_14 = add i32 %_13, 1
-	store i32 %_14, i32* %a
+	%_12 = load i32, i32* %a
+	%_13 = add i32 %_12, 1
+	store i32 %_13, i32* %a
 
 
 	br label %L0
 L2:
 
-	%_15 = load i32, i32* %a
-	call void (i32) @print_int(i32 %_15)
+	%_14 = load i32, i32* %a
+	call void (i32) @print_int(i32 %_14)
 
-	%_16 = bitcast i8* %this to i8***
-	%_17 = load i8**, i8*** %_16
-	%_18 = getelementptr i8*, i8** %_17, i32 1
-	%_19 = load i8*, i8** %_18
-	%_20 = bitcast i8* %_19 to i32 (i8*, i32, i1)*
-	%_21 = call i32 %_20(i8* %this, i32 7, i1 1)
-	store i32 %_21, i32* %b
+	%_15 = bitcast i8* %this to i8***
+	%_16 = load i8**, i8*** %_15
+	%_17 = getelementptr i8*, i8** %_16, i32 1
+	%_18 = load i8*, i8** %_17
+	%_19 = bitcast i8* %_18 to i32 (i8*, i32, i1)*
+	%_20 = call i32 %_19(i8* %this, i32 7, i1 1)
+	store i32 %_20, i32* %b
 
-	%_23 = load i32, i32* %b
-	call void (i32) @print_int(i32 %_23)
+	%_21 = load i32, i32* %b
+	call void (i32) @print_int(i32 %_21)
 
 	ret i32 0
 }
@@ -101,14 +101,14 @@ define i32 @A.bar(i8* %this, i32 %.a, i1 %.cond) {
 
 	br label %L3
 L3:
-	%_24 = load i1, i1* %cond
-	br i1 %_24, label %L4, label %L5
+	%_22 = load i1, i1* %cond
+	br i1 %_22, label %L4, label %L5
 L4:
-	%_25 = load i32, i32* %a
-	store i32 %_25, i32* %b
+	%_23 = load i32, i32* %a
+	store i32 %_23, i32* %b
 
-	%_26 = load i1, i1* %cond
-	br i1 %_26, label %L6, label %L7
+	%_24 = load i1, i1* %cond
+	br i1 %_24, label %L6, label %L7
 L6:
 	store i32 2, i32* %a
 
@@ -125,7 +125,7 @@ L8:
 	br label %L3
 L5:
 
-	%_27 = load i32, i32* %b
-	ret i32 %_27
+	%_25 = load i32, i32* %b
+	ret i32 %_25
 }
 

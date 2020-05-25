@@ -46,17 +46,17 @@ define i32 @main() {
 	%_8 = call i32 %_7(i8* %_0, i32 1)
 	call void (i32) @print_int(i32 %_8)
 
-	%_10 = call i8* @calloc(i32 1, i32 8)
-	%_11 = bitcast i8* %_10 to i8***
-	%_12 = getelementptr [1 x i8*], [1 x i8*]* @.A_vtable, i32 0, i32 0
-	store i8** %_12, i8*** %_11
-	%_13 = bitcast i8* %_10 to i8***
-	%_14 = load i8**, i8*** %_13
-	%_15 = getelementptr i8*, i8** %_14, i32 0
-	%_16 = load i8*, i8** %_15
-	%_17 = bitcast i8* %_16 to i32 (i8*, i32)*
-	%_18 = call i32 %_17(i8* %_10, i32 2)
-	call void (i32) @print_int(i32 %_18)
+	%_9 = call i8* @calloc(i32 1, i32 8)
+	%_10 = bitcast i8* %_9 to i8***
+	%_11 = getelementptr [1 x i8*], [1 x i8*]* @.A_vtable, i32 0, i32 0
+	store i8** %_11, i8*** %_10
+	%_12 = bitcast i8* %_9 to i8***
+	%_13 = load i8**, i8*** %_12
+	%_14 = getelementptr i8*, i8** %_13, i32 0
+	%_15 = load i8*, i8** %_14
+	%_16 = bitcast i8* %_15 to i32 (i8*, i32)*
+	%_17 = call i32 %_16(i8* %_9, i32 2)
+	call void (i32) @print_int(i32 %_17)
 
 	ret i32 0
 }
@@ -65,9 +65,9 @@ define i32 @A.foo(i8* %this, i32 %.a) {
 	%a = alloca i32
 	store i32 %.a, i32* %a
 
-	%_20 = load i32, i32* %a
-	%_21 = icmp slt i32 %_20, 2
-	br i1 %_21, label %L0, label %L1
+	%_18 = load i32, i32* %a
+	%_19 = icmp slt i32 %_18, 2
+	br i1 %_19, label %L0, label %L1
 L0:
 	store i32 3, i32* %a
 
@@ -80,7 +80,7 @@ L1:
 	br label %L2
 L2:
 
-	%_22 = load i32, i32* %a
-	ret i32 %_22
+	%_20 = load i32, i32* %a
+	ret i32 %_20
 }
 

@@ -57,214 +57,214 @@ define i32 @main() {
 	%_8 = load i8*, i8** %_7
 	%_9 = bitcast i8* %_8 to i1 (i8*, i1, i1, i1)*
 	%_10 = call i1 %_9(i8* %_4, i1 0, i1 0, i1 0)
-	%_12 = bitcast i8* %_3 to i8***
-	%_13 = load i8**, i8*** %_12
-	%_14 = getelementptr i8*, i8** %_13, i32 2
-	%_15 = load i8*, i8** %_14
-	%_16 = bitcast i8* %_15 to i1 (i8*, i1)*
-	%_17 = call i1 %_16(i8* %_3, i1 %_10)
-	store i1 %_17, i1* %dummy
+	%_11 = bitcast i8* %_3 to i8***
+	%_12 = load i8**, i8*** %_11
+	%_13 = getelementptr i8*, i8** %_12, i32 2
+	%_14 = load i8*, i8** %_13
+	%_15 = bitcast i8* %_14 to i1 (i8*, i1)*
+	%_16 = call i1 %_15(i8* %_3, i1 %_10)
+	store i1 %_16, i1* %dummy
 
-	%_19 = load i8*, i8** %a
-	%_20 = load i8*, i8** %a
-	%_21 = bitcast i8* %_20 to i8***
-	%_22 = load i8**, i8*** %_21
-	%_23 = getelementptr i8*, i8** %_22, i32 0
-	%_24 = load i8*, i8** %_23
-	%_25 = bitcast i8* %_24 to i1 (i8*, i1, i1, i1)*
-	%_26 = call i1 %_25(i8* %_20, i1 0, i1 0, i1 1)
-	%_28 = bitcast i8* %_19 to i8***
-	%_29 = load i8**, i8*** %_28
-	%_30 = getelementptr i8*, i8** %_29, i32 2
-	%_31 = load i8*, i8** %_30
-	%_32 = bitcast i8* %_31 to i1 (i8*, i1)*
-	%_33 = call i1 %_32(i8* %_19, i1 %_26)
-	store i1 %_33, i1* %dummy
+	%_17 = load i8*, i8** %a
+	%_18 = load i8*, i8** %a
+	%_19 = bitcast i8* %_18 to i8***
+	%_20 = load i8**, i8*** %_19
+	%_21 = getelementptr i8*, i8** %_20, i32 0
+	%_22 = load i8*, i8** %_21
+	%_23 = bitcast i8* %_22 to i1 (i8*, i1, i1, i1)*
+	%_24 = call i1 %_23(i8* %_18, i1 0, i1 0, i1 1)
+	%_25 = bitcast i8* %_17 to i8***
+	%_26 = load i8**, i8*** %_25
+	%_27 = getelementptr i8*, i8** %_26, i32 2
+	%_28 = load i8*, i8** %_27
+	%_29 = bitcast i8* %_28 to i1 (i8*, i1)*
+	%_30 = call i1 %_29(i8* %_17, i1 %_24)
+	store i1 %_30, i1* %dummy
 
-	%_35 = load i8*, i8** %a
-	%_36 = load i8*, i8** %a
-	%_37 = bitcast i8* %_36 to i8***
-	%_38 = load i8**, i8*** %_37
-	%_39 = getelementptr i8*, i8** %_38, i32 0
-	%_40 = load i8*, i8** %_39
-	%_41 = bitcast i8* %_40 to i1 (i8*, i1, i1, i1)*
-	%_42 = call i1 %_41(i8* %_36, i1 0, i1 1, i1 0)
-	%_44 = bitcast i8* %_35 to i8***
-	%_45 = load i8**, i8*** %_44
-	%_46 = getelementptr i8*, i8** %_45, i32 2
-	%_47 = load i8*, i8** %_46
-	%_48 = bitcast i8* %_47 to i1 (i8*, i1)*
-	%_49 = call i1 %_48(i8* %_35, i1 %_42)
-	store i1 %_49, i1* %dummy
+	%_31 = load i8*, i8** %a
+	%_32 = load i8*, i8** %a
+	%_33 = bitcast i8* %_32 to i8***
+	%_34 = load i8**, i8*** %_33
+	%_35 = getelementptr i8*, i8** %_34, i32 0
+	%_36 = load i8*, i8** %_35
+	%_37 = bitcast i8* %_36 to i1 (i8*, i1, i1, i1)*
+	%_38 = call i1 %_37(i8* %_32, i1 0, i1 1, i1 0)
+	%_39 = bitcast i8* %_31 to i8***
+	%_40 = load i8**, i8*** %_39
+	%_41 = getelementptr i8*, i8** %_40, i32 2
+	%_42 = load i8*, i8** %_41
+	%_43 = bitcast i8* %_42 to i1 (i8*, i1)*
+	%_44 = call i1 %_43(i8* %_31, i1 %_38)
+	store i1 %_44, i1* %dummy
 
-	%_51 = load i8*, i8** %a
-	%_52 = load i8*, i8** %a
-	%_53 = bitcast i8* %_52 to i8***
+	%_45 = load i8*, i8** %a
+	%_46 = load i8*, i8** %a
+	%_47 = bitcast i8* %_46 to i8***
+	%_48 = load i8**, i8*** %_47
+	%_49 = getelementptr i8*, i8** %_48, i32 0
+	%_50 = load i8*, i8** %_49
+	%_51 = bitcast i8* %_50 to i1 (i8*, i1, i1, i1)*
+	%_52 = call i1 %_51(i8* %_46, i1 0, i1 1, i1 1)
+	%_53 = bitcast i8* %_45 to i8***
 	%_54 = load i8**, i8*** %_53
-	%_55 = getelementptr i8*, i8** %_54, i32 0
+	%_55 = getelementptr i8*, i8** %_54, i32 2
 	%_56 = load i8*, i8** %_55
-	%_57 = bitcast i8* %_56 to i1 (i8*, i1, i1, i1)*
-	%_58 = call i1 %_57(i8* %_52, i1 0, i1 1, i1 1)
-	%_60 = bitcast i8* %_51 to i8***
-	%_61 = load i8**, i8*** %_60
-	%_62 = getelementptr i8*, i8** %_61, i32 2
-	%_63 = load i8*, i8** %_62
-	%_64 = bitcast i8* %_63 to i1 (i8*, i1)*
-	%_65 = call i1 %_64(i8* %_51, i1 %_58)
-	store i1 %_65, i1* %dummy
+	%_57 = bitcast i8* %_56 to i1 (i8*, i1)*
+	%_58 = call i1 %_57(i8* %_45, i1 %_52)
+	store i1 %_58, i1* %dummy
 
-	%_67 = load i8*, i8** %a
-	%_68 = load i8*, i8** %a
-	%_69 = bitcast i8* %_68 to i8***
-	%_70 = load i8**, i8*** %_69
-	%_71 = getelementptr i8*, i8** %_70, i32 0
-	%_72 = load i8*, i8** %_71
-	%_73 = bitcast i8* %_72 to i1 (i8*, i1, i1, i1)*
-	%_74 = call i1 %_73(i8* %_68, i1 1, i1 0, i1 0)
-	%_76 = bitcast i8* %_67 to i8***
-	%_77 = load i8**, i8*** %_76
-	%_78 = getelementptr i8*, i8** %_77, i32 2
-	%_79 = load i8*, i8** %_78
-	%_80 = bitcast i8* %_79 to i1 (i8*, i1)*
-	%_81 = call i1 %_80(i8* %_67, i1 %_74)
-	store i1 %_81, i1* %dummy
+	%_59 = load i8*, i8** %a
+	%_60 = load i8*, i8** %a
+	%_61 = bitcast i8* %_60 to i8***
+	%_62 = load i8**, i8*** %_61
+	%_63 = getelementptr i8*, i8** %_62, i32 0
+	%_64 = load i8*, i8** %_63
+	%_65 = bitcast i8* %_64 to i1 (i8*, i1, i1, i1)*
+	%_66 = call i1 %_65(i8* %_60, i1 1, i1 0, i1 0)
+	%_67 = bitcast i8* %_59 to i8***
+	%_68 = load i8**, i8*** %_67
+	%_69 = getelementptr i8*, i8** %_68, i32 2
+	%_70 = load i8*, i8** %_69
+	%_71 = bitcast i8* %_70 to i1 (i8*, i1)*
+	%_72 = call i1 %_71(i8* %_59, i1 %_66)
+	store i1 %_72, i1* %dummy
 
-	%_83 = load i8*, i8** %a
-	%_84 = load i8*, i8** %a
-	%_85 = bitcast i8* %_84 to i8***
-	%_86 = load i8**, i8*** %_85
-	%_87 = getelementptr i8*, i8** %_86, i32 0
-	%_88 = load i8*, i8** %_87
-	%_89 = bitcast i8* %_88 to i1 (i8*, i1, i1, i1)*
-	%_90 = call i1 %_89(i8* %_84, i1 1, i1 0, i1 1)
-	%_92 = bitcast i8* %_83 to i8***
-	%_93 = load i8**, i8*** %_92
-	%_94 = getelementptr i8*, i8** %_93, i32 2
-	%_95 = load i8*, i8** %_94
-	%_96 = bitcast i8* %_95 to i1 (i8*, i1)*
-	%_97 = call i1 %_96(i8* %_83, i1 %_90)
-	store i1 %_97, i1* %dummy
+	%_73 = load i8*, i8** %a
+	%_74 = load i8*, i8** %a
+	%_75 = bitcast i8* %_74 to i8***
+	%_76 = load i8**, i8*** %_75
+	%_77 = getelementptr i8*, i8** %_76, i32 0
+	%_78 = load i8*, i8** %_77
+	%_79 = bitcast i8* %_78 to i1 (i8*, i1, i1, i1)*
+	%_80 = call i1 %_79(i8* %_74, i1 1, i1 0, i1 1)
+	%_81 = bitcast i8* %_73 to i8***
+	%_82 = load i8**, i8*** %_81
+	%_83 = getelementptr i8*, i8** %_82, i32 2
+	%_84 = load i8*, i8** %_83
+	%_85 = bitcast i8* %_84 to i1 (i8*, i1)*
+	%_86 = call i1 %_85(i8* %_73, i1 %_80)
+	store i1 %_86, i1* %dummy
 
-	%_99 = load i8*, i8** %a
-	%_100 = load i8*, i8** %a
-	%_101 = bitcast i8* %_100 to i8***
-	%_102 = load i8**, i8*** %_101
-	%_103 = getelementptr i8*, i8** %_102, i32 0
-	%_104 = load i8*, i8** %_103
-	%_105 = bitcast i8* %_104 to i1 (i8*, i1, i1, i1)*
-	%_106 = call i1 %_105(i8* %_100, i1 1, i1 1, i1 0)
-	%_108 = bitcast i8* %_99 to i8***
-	%_109 = load i8**, i8*** %_108
-	%_110 = getelementptr i8*, i8** %_109, i32 2
-	%_111 = load i8*, i8** %_110
-	%_112 = bitcast i8* %_111 to i1 (i8*, i1)*
-	%_113 = call i1 %_112(i8* %_99, i1 %_106)
-	store i1 %_113, i1* %dummy
+	%_87 = load i8*, i8** %a
+	%_88 = load i8*, i8** %a
+	%_89 = bitcast i8* %_88 to i8***
+	%_90 = load i8**, i8*** %_89
+	%_91 = getelementptr i8*, i8** %_90, i32 0
+	%_92 = load i8*, i8** %_91
+	%_93 = bitcast i8* %_92 to i1 (i8*, i1, i1, i1)*
+	%_94 = call i1 %_93(i8* %_88, i1 1, i1 1, i1 0)
+	%_95 = bitcast i8* %_87 to i8***
+	%_96 = load i8**, i8*** %_95
+	%_97 = getelementptr i8*, i8** %_96, i32 2
+	%_98 = load i8*, i8** %_97
+	%_99 = bitcast i8* %_98 to i1 (i8*, i1)*
+	%_100 = call i1 %_99(i8* %_87, i1 %_94)
+	store i1 %_100, i1* %dummy
+
+	%_101 = load i8*, i8** %a
+	%_102 = load i8*, i8** %a
+	%_103 = bitcast i8* %_102 to i8***
+	%_104 = load i8**, i8*** %_103
+	%_105 = getelementptr i8*, i8** %_104, i32 0
+	%_106 = load i8*, i8** %_105
+	%_107 = bitcast i8* %_106 to i1 (i8*, i1, i1, i1)*
+	%_108 = call i1 %_107(i8* %_102, i1 1, i1 1, i1 1)
+	%_109 = bitcast i8* %_101 to i8***
+	%_110 = load i8**, i8*** %_109
+	%_111 = getelementptr i8*, i8** %_110, i32 2
+	%_112 = load i8*, i8** %_111
+	%_113 = bitcast i8* %_112 to i1 (i8*, i1)*
+	%_114 = call i1 %_113(i8* %_101, i1 %_108)
+	store i1 %_114, i1* %dummy
 
 	%_115 = load i8*, i8** %a
 	%_116 = load i8*, i8** %a
 	%_117 = bitcast i8* %_116 to i8***
 	%_118 = load i8**, i8*** %_117
-	%_119 = getelementptr i8*, i8** %_118, i32 0
+	%_119 = getelementptr i8*, i8** %_118, i32 1
 	%_120 = load i8*, i8** %_119
-	%_121 = bitcast i8* %_120 to i1 (i8*, i1, i1, i1)*
-	%_122 = call i1 %_121(i8* %_116, i1 1, i1 1, i1 1)
-	%_124 = bitcast i8* %_115 to i8***
-	%_125 = load i8**, i8*** %_124
-	%_126 = getelementptr i8*, i8** %_125, i32 2
-	%_127 = load i8*, i8** %_126
-	%_128 = bitcast i8* %_127 to i1 (i8*, i1)*
-	%_129 = call i1 %_128(i8* %_115, i1 %_122)
-	store i1 %_129, i1* %dummy
+	%_121 = bitcast i8* %_120 to i1 (i8*, i1, i1)*
+	%_122 = call i1 %_121(i8* %_116, i1 1, i1 1)
+	%_123 = bitcast i8* %_115 to i8***
+	%_124 = load i8**, i8*** %_123
+	%_125 = getelementptr i8*, i8** %_124, i32 2
+	%_126 = load i8*, i8** %_125
+	%_127 = bitcast i8* %_126 to i1 (i8*, i1)*
+	%_128 = call i1 %_127(i8* %_115, i1 %_122)
+	store i1 %_128, i1* %dummy
 
-	%_131 = load i8*, i8** %a
-	%_132 = load i8*, i8** %a
-	%_133 = bitcast i8* %_132 to i8***
-	%_134 = load i8**, i8*** %_133
-	%_135 = getelementptr i8*, i8** %_134, i32 1
-	%_136 = load i8*, i8** %_135
-	%_137 = bitcast i8* %_136 to i1 (i8*, i1, i1)*
-	%_138 = call i1 %_137(i8* %_132, i1 1, i1 1)
-	%_140 = bitcast i8* %_131 to i8***
-	%_141 = load i8**, i8*** %_140
-	%_142 = getelementptr i8*, i8** %_141, i32 2
-	%_143 = load i8*, i8** %_142
-	%_144 = bitcast i8* %_143 to i1 (i8*, i1)*
-	%_145 = call i1 %_144(i8* %_131, i1 %_138)
-	store i1 %_145, i1* %dummy
+	%_129 = load i8*, i8** %a
+	%_130 = load i8*, i8** %a
+	%_131 = bitcast i8* %_130 to i8***
+	%_132 = load i8**, i8*** %_131
+	%_133 = getelementptr i8*, i8** %_132, i32 1
+	%_134 = load i8*, i8** %_133
+	%_135 = bitcast i8* %_134 to i1 (i8*, i1, i1)*
+	%_136 = call i1 %_135(i8* %_130, i1 0, i1 1)
+	%_137 = bitcast i8* %_129 to i8***
+	%_138 = load i8**, i8*** %_137
+	%_139 = getelementptr i8*, i8** %_138, i32 2
+	%_140 = load i8*, i8** %_139
+	%_141 = bitcast i8* %_140 to i1 (i8*, i1)*
+	%_142 = call i1 %_141(i8* %_129, i1 %_136)
+	store i1 %_142, i1* %dummy
 
-	%_147 = load i8*, i8** %a
-	%_148 = load i8*, i8** %a
-	%_149 = bitcast i8* %_148 to i8***
-	%_150 = load i8**, i8*** %_149
-	%_151 = getelementptr i8*, i8** %_150, i32 1
-	%_152 = load i8*, i8** %_151
-	%_153 = bitcast i8* %_152 to i1 (i8*, i1, i1)*
-	%_154 = call i1 %_153(i8* %_148, i1 0, i1 1)
-	%_156 = bitcast i8* %_147 to i8***
-	%_157 = load i8**, i8*** %_156
-	%_158 = getelementptr i8*, i8** %_157, i32 2
-	%_159 = load i8*, i8** %_158
-	%_160 = bitcast i8* %_159 to i1 (i8*, i1)*
-	%_161 = call i1 %_160(i8* %_147, i1 %_154)
-	store i1 %_161, i1* %dummy
+	%_143 = load i8*, i8** %a
+	%_144 = call i8* @calloc(i32 1, i32 8)
+	%_145 = bitcast i8* %_144 to i8***
+	%_146 = getelementptr [2 x i8*], [2 x i8*]* @.B_vtable, i32 0, i32 0
+	store i8** %_146, i8*** %_145
+	%_147 = bitcast i8* %_144 to i8***
+	%_148 = load i8**, i8*** %_147
+	%_149 = getelementptr i8*, i8** %_148, i32 0
+	%_150 = load i8*, i8** %_149
+	%_151 = bitcast i8* %_150 to i1 (i8*, i32)*
+	%_152 = call i1 %_151(i8* %_144, i32 1)
+	%_153 = bitcast i8* %_143 to i8***
+	%_154 = load i8**, i8*** %_153
+	%_155 = getelementptr i8*, i8** %_154, i32 2
+	%_156 = load i8*, i8** %_155
+	%_157 = bitcast i8* %_156 to i1 (i8*, i1)*
+	%_158 = call i1 %_157(i8* %_143, i1 %_152)
+	store i1 %_158, i1* %dummy
 
-	%_163 = load i8*, i8** %a
-	%_164 = call i8* @calloc(i32 1, i32 8)
-	%_165 = bitcast i8* %_164 to i8***
-	%_166 = getelementptr [2 x i8*], [2 x i8*]* @.B_vtable, i32 0, i32 0
-	store i8** %_166, i8*** %_165
-	%_167 = bitcast i8* %_164 to i8***
-	%_168 = load i8**, i8*** %_167
-	%_169 = getelementptr i8*, i8** %_168, i32 0
-	%_170 = load i8*, i8** %_169
-	%_171 = bitcast i8* %_170 to i1 (i8*, i32)*
-	%_172 = call i1 %_171(i8* %_164, i32 1)
-	%_174 = bitcast i8* %_163 to i8***
-	%_175 = load i8**, i8*** %_174
-	%_176 = getelementptr i8*, i8** %_175, i32 2
-	%_177 = load i8*, i8** %_176
-	%_178 = bitcast i8* %_177 to i1 (i8*, i1)*
-	%_179 = call i1 %_178(i8* %_163, i1 %_172)
-	store i1 %_179, i1* %dummy
+	%_159 = load i8*, i8** %a
+	%_160 = call i8* @calloc(i32 1, i32 8)
+	%_161 = bitcast i8* %_160 to i8***
+	%_162 = getelementptr [2 x i8*], [2 x i8*]* @.B_vtable, i32 0, i32 0
+	store i8** %_162, i8*** %_161
+	%_163 = bitcast i8* %_160 to i8***
+	%_164 = load i8**, i8*** %_163
+	%_165 = getelementptr i8*, i8** %_164, i32 0
+	%_166 = load i8*, i8** %_165
+	%_167 = bitcast i8* %_166 to i1 (i8*, i32)*
+	%_168 = call i1 %_167(i8* %_160, i32 2)
+	%_169 = bitcast i8* %_159 to i8***
+	%_170 = load i8**, i8*** %_169
+	%_171 = getelementptr i8*, i8** %_170, i32 2
+	%_172 = load i8*, i8** %_171
+	%_173 = bitcast i8* %_172 to i1 (i8*, i1)*
+	%_174 = call i1 %_173(i8* %_159, i1 %_168)
+	store i1 %_174, i1* %dummy
 
-	%_181 = load i8*, i8** %a
-	%_182 = call i8* @calloc(i32 1, i32 8)
-	%_183 = bitcast i8* %_182 to i8***
-	%_184 = getelementptr [2 x i8*], [2 x i8*]* @.B_vtable, i32 0, i32 0
-	store i8** %_184, i8*** %_183
-	%_185 = bitcast i8* %_182 to i8***
+	%_175 = load i8*, i8** %a
+	%_176 = call i8* @calloc(i32 1, i32 8)
+	%_177 = bitcast i8* %_176 to i8***
+	%_178 = getelementptr [2 x i8*], [2 x i8*]* @.B_vtable, i32 0, i32 0
+	store i8** %_178, i8*** %_177
+	%_179 = bitcast i8* %_176 to i8***
+	%_180 = load i8**, i8*** %_179
+	%_181 = getelementptr i8*, i8** %_180, i32 1
+	%_182 = load i8*, i8** %_181
+	%_183 = bitcast i8* %_182 to i1 (i8*, i32, i32, i1, i1)*
+	%_184 = call i1 %_183(i8* %_176, i32 2, i32 2, i1 1, i1 1)
+	%_185 = bitcast i8* %_175 to i8***
 	%_186 = load i8**, i8*** %_185
-	%_187 = getelementptr i8*, i8** %_186, i32 0
+	%_187 = getelementptr i8*, i8** %_186, i32 2
 	%_188 = load i8*, i8** %_187
-	%_189 = bitcast i8* %_188 to i1 (i8*, i32)*
-	%_190 = call i1 %_189(i8* %_182, i32 2)
-	%_192 = bitcast i8* %_181 to i8***
-	%_193 = load i8**, i8*** %_192
-	%_194 = getelementptr i8*, i8** %_193, i32 2
-	%_195 = load i8*, i8** %_194
-	%_196 = bitcast i8* %_195 to i1 (i8*, i1)*
-	%_197 = call i1 %_196(i8* %_181, i1 %_190)
-	store i1 %_197, i1* %dummy
-
-	%_199 = load i8*, i8** %a
-	%_200 = call i8* @calloc(i32 1, i32 8)
-	%_201 = bitcast i8* %_200 to i8***
-	%_202 = getelementptr [2 x i8*], [2 x i8*]* @.B_vtable, i32 0, i32 0
-	store i8** %_202, i8*** %_201
-	%_203 = bitcast i8* %_200 to i8***
-	%_204 = load i8**, i8*** %_203
-	%_205 = getelementptr i8*, i8** %_204, i32 1
-	%_206 = load i8*, i8** %_205
-	%_207 = bitcast i8* %_206 to i1 (i8*, i32, i32, i1, i1)*
-	%_208 = call i1 %_207(i8* %_200, i32 2, i32 2, i1 1, i1 1)
-	%_210 = bitcast i8* %_199 to i8***
-	%_211 = load i8**, i8*** %_210
-	%_212 = getelementptr i8*, i8** %_211, i32 2
-	%_213 = load i8*, i8** %_212
-	%_214 = bitcast i8* %_213 to i1 (i8*, i1)*
-	%_215 = call i1 %_214(i8* %_199, i1 %_208)
-	store i1 %_215, i1* %dummy
+	%_189 = bitcast i8* %_188 to i1 (i8*, i1)*
+	%_190 = call i1 %_189(i8* %_175, i1 %_184)
+	store i1 %_190, i1* %dummy
 
 	ret i32 0
 }
@@ -277,28 +277,28 @@ define i1 @A.foo(i8* %this, i1 %.a, i1 %.b, i1 %.c) {
 	%c = alloca i1
 	store i1 %.c, i1* %c
 
-	%_217 = load i1, i1* %a
-	br i1 %_217, label %L1, label %L0
+	%_191 = load i1, i1* %a
+	br i1 %_191, label %L1, label %L0
 L0:
 	br label %L3
 L1:
-	%_218 = load i1, i1* %b
+	%_192 = load i1, i1* %b
 	br label %L2
 L2:
 	br label %L3
 L3:
-	%_219 = phi i1 [0, %L0], [%_218, %L2]
-	br i1 %_219, label %L5, label %L4
+	%_193 = phi i1 [0, %L0], [%_192, %L2]
+	br i1 %_193, label %L5, label %L4
 L4:
 	br label %L7
 L5:
-	%_220 = load i1, i1* %c
+	%_194 = load i1, i1* %c
 	br label %L6
 L6:
 	br label %L7
 L7:
-	%_221 = phi i1 [0, %L4], [%_220, %L6]
-	ret i1 %_221
+	%_195 = phi i1 [0, %L4], [%_194, %L6]
+	ret i1 %_195
 }
 
 define i1 @A.bar(i8* %this, i1 %.a, i1 %.b) {
@@ -307,43 +307,43 @@ define i1 @A.bar(i8* %this, i1 %.a, i1 %.b) {
 	%b = alloca i1
 	store i1 %.b, i1* %b
 
-	%_222 = load i1, i1* %a
-	br i1 %_222, label %L9, label %L8
+	%_196 = load i1, i1* %a
+	br i1 %_196, label %L9, label %L8
 L8:
 	br label %L11
 L9:
-	%_223 = load i1, i1* %a
-	%_224 = load i1, i1* %b
-	%_225 = bitcast i8* %this to i8***
-	%_226 = load i8**, i8*** %_225
-	%_227 = getelementptr i8*, i8** %_226, i32 0
-	%_228 = load i8*, i8** %_227
-	%_229 = bitcast i8* %_228 to i1 (i8*, i1, i1, i1)*
-	%_230 = call i1 %_229(i8* %this, i1 %_223, i1 %_224, i1 1)
+	%_197 = load i1, i1* %a
+	%_198 = load i1, i1* %b
+	%_199 = bitcast i8* %this to i8***
+	%_200 = load i8**, i8*** %_199
+	%_201 = getelementptr i8*, i8** %_200, i32 0
+	%_202 = load i8*, i8** %_201
+	%_203 = bitcast i8* %_202 to i1 (i8*, i1, i1, i1)*
+	%_204 = call i1 %_203(i8* %this, i1 %_197, i1 %_198, i1 1)
 	br label %L10
 L10:
 	br label %L11
 L11:
-	%_232 = phi i1 [0, %L8], [%_230, %L10]
-	br i1 %_232, label %L13, label %L12
+	%_205 = phi i1 [0, %L8], [%_204, %L10]
+	br i1 %_205, label %L13, label %L12
 L12:
 	br label %L15
 L13:
-	%_233 = load i1, i1* %b
+	%_206 = load i1, i1* %b
 	br label %L14
 L14:
 	br label %L15
 L15:
-	%_234 = phi i1 [0, %L12], [%_233, %L14]
-	ret i1 %_234
+	%_207 = phi i1 [0, %L12], [%_206, %L14]
+	ret i1 %_207
 }
 
 define i1 @A.print(i8* %this, i1 %.res) {
 	%res = alloca i1
 	store i1 %.res, i1* %res
 
-	%_235 = load i1, i1* %res
-	br i1 %_235, label %L16, label %L17
+	%_208 = load i1, i1* %res
+	br i1 %_208, label %L16, label %L17
 L16:
 	call void (i32) @print_int(i32 1)
 
@@ -363,17 +363,17 @@ define i1 @B.foo(i8* %this, i32 %.a) {
 	%a = alloca i32
 	store i32 %.a, i32* %a
 
-	%_236 = load i32, i32* %a
-	%_237 = add i32 %_236, 2
-	%_238 = icmp slt i32 3, %_237
-	br i1 %_238, label %L19, label %L20
+	%_209 = load i32, i32* %a
+	%_210 = add i32 %_209, 2
+	%_211 = icmp slt i32 3, %_210
+	br i1 %_211, label %L19, label %L20
 L19:
 	br label %L21
 L20:
 	br label %L21
 L21:
-	%_239 = phi i1 [0, %L19], [1, %L20]
-	br i1 %_239, label %L26, label %L25
+	%_212 = phi i1 [0, %L19], [1, %L20]
+	br i1 %_212, label %L26, label %L25
 L25:
 	br label %L28
 L26:
@@ -383,13 +383,13 @@ L22:
 L23:
 	br label %L24
 L24:
-	%_240 = phi i1 [0, %L22], [1, %L23]
+	%_213 = phi i1 [0, %L22], [1, %L23]
 	br label %L27
 L27:
 	br label %L28
 L28:
-	%_241 = phi i1 [0, %L25], [%_240, %L27]
-	ret i1 %_241
+	%_214 = phi i1 [0, %L25], [%_213, %L27]
+	ret i1 %_214
 }
 
 define i1 @B.t(i8* %this, i32 %.a, i32 %.b, i1 %.c, i1 %.d) {
@@ -402,36 +402,36 @@ define i1 @B.t(i8* %this, i32 %.a, i32 %.b, i1 %.c, i1 %.d) {
 	%d = alloca i1
 	store i1 %.d, i1* %d
 
-	%_242 = load i32, i32* %a
-	%_243 = load i32, i32* %b
-	%_244 = icmp slt i32 %_242, %_243
-	br i1 %_244, label %L29, label %L30
+	%_215 = load i32, i32* %a
+	%_216 = load i32, i32* %b
+	%_217 = icmp slt i32 %_215, %_216
+	br i1 %_217, label %L29, label %L30
 L29:
 	br label %L31
 L30:
 	br label %L31
 L31:
-	%_245 = phi i1 [0, %L29], [1, %L30]
-	br i1 %_245, label %L37, label %L36
+	%_218 = phi i1 [0, %L29], [1, %L30]
+	br i1 %_218, label %L37, label %L36
 L36:
 	br label %L39
 L37:
-	%_246 = load i1, i1* %c
-	br i1 %_246, label %L33, label %L32
+	%_219 = load i1, i1* %c
+	br i1 %_219, label %L33, label %L32
 L32:
 	br label %L35
 L33:
-	%_247 = load i1, i1* %d
+	%_220 = load i1, i1* %d
 	br label %L34
 L34:
 	br label %L35
 L35:
-	%_248 = phi i1 [0, %L32], [%_247, %L34]
+	%_221 = phi i1 [0, %L32], [%_220, %L34]
 	br label %L38
 L38:
 	br label %L39
 L39:
-	%_249 = phi i1 [0, %L36], [%_248, %L38]
-	ret i1 %_249
+	%_222 = phi i1 [0, %L36], [%_221, %L38]
+	ret i1 %_222
 }
 
