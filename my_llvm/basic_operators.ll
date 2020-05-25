@@ -48,18 +48,18 @@ define i32 @main() {
 	%_5 = add i32 %_3, %_4
 	call void (i32) @print_int(i32 %_5)
 
-	%_6 =  mul i32 1, 2
-	%_7 =  mul i32 %_6, 3
+	%_6 = mul i32 1, 2
+	%_7 = mul i32 %_6, 3
 	%_8 = load i32, i32* %i
-	%_9 =  mul i32 %_7, %_8
+	%_9 = mul i32 %_7, %_8
 	%_10 = load i32, i32* %j
-	%_11 =  mul i32 %_9, %_10
+	%_11 = mul i32 %_9, %_10
 	call void (i32) @print_int(i32 %_11)
 
-	%_12 =  mul i32 1, 2
-	%_13 =  mul i32 %_12, 3
+	%_12 = mul i32 1, 2
+	%_13 = mul i32 %_12, 3
 	%_14 = load i32, i32* %i
-	%_15 =  sub i32 %_13, %_14
+	%_15 = sub i32 %_13, %_14
 	%_16 = load i32, i32* %j
 	%_17 = add i32 %_15, %_16
 	call void (i32) @print_int(i32 %_17)
@@ -74,10 +74,10 @@ define i32 @main() {
 	%_24 = load i8*, i8** %_23
 	%_25 = bitcast i8* %_24 to i32 (i8*)*
 	%_26 = call i32 %_25(i8* %_18)
-	%_28 =  mul i32 1, %_26
-	%_29 =  mul i32 %_28, 3
+	%_28 = mul i32 1, %_26
+	%_29 = mul i32 %_28, 3
 	%_30 = load i32, i32* %i
-	%_31 =  sub i32 %_29, %_30
+	%_31 = sub i32 %_29, %_30
 	%_32 = add i32 %_31, 20
 	call void (i32) @print_int(i32 %_32)
 

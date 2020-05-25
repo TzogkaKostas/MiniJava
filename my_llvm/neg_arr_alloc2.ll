@@ -32,7 +32,7 @@ define i32 @main() {
 	%b = alloca i32*
 	%x = alloca i32
 
-	%_0 =  sub i32 1, 2
+	%_0 = sub i32 1, 2
 	store i32 %_0, i32* %x
 
 	%_1 = load i32, i32* %x

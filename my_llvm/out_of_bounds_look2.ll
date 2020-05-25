@@ -44,12 +44,13 @@ L0:
 	store i32 2, i32* %_3
 	store i8* %_2, i8** %b
 
-	%_4 =  sub i32 0, 1
+	%_4 = sub i32 0, 1
 	store i32 %_4, i32* %c
 
 	%_5 = load i8*, i8** %b
 	%_6 = load i32, i32* %c
-	%_7 = bitcast i8* %_5 to i32*	%_8 = load i32, i32* %_7
+	%_7 = bitcast i8* %_5 to i32*
+	%_8 = load i32, i32* %_7
 	%_9 = icmp sge i32 %_6, 0
 	%_10 = icmp slt i32 %_6, %_8
 	%_11 = and i1 %_9, %_10
@@ -58,7 +59,7 @@ L3:
 	call void @throw_oob()
 	br label %L2
 L2:
-	%_12 = add i32 1, %_6
+	%_12 = add i32 4, %_6
 	%_13 = getelementptr i8, i8* %_5, i32 %_12
 	%_14 = load i8, i8* %_13
 	%_15 = trunc i8 %_14 to i1

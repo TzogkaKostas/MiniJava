@@ -41,7 +41,7 @@ define i32 @main() {
 
 	%_0 = load i32, i32* %size
 	%_1 = add i32 %_0, 1
-	%_2 =  sub i32 %_1, 1
+	%_2 = sub i32 %_1, 1
 	%_3 = add i32 1, %_2
 	%_4 = icmp sge i32 %_3, 1
 	br i1 %_4, label %L0, label %L1
@@ -102,7 +102,7 @@ L14:
 
 	%_23 = load i32, i32* %size
 	%_24 = add i32 %_23, 1
-	%_25 =  sub i32 %_24, 1
+	%_25 = sub i32 %_24, 1
 	%_26 = add i32 4, %_25
 	%_27 = icmp sge i32 %_26, 4
 	br i1 %_27, label %L15, label %L16
@@ -184,7 +184,7 @@ L34:
 L33:
 	%_62 = add i32 1, %_51
 	%_52 = load i32, i32* %index
-	%_53 =  mul i32 %_52, 2
+	%_53 = mul i32 %_52, 2
 	%_64 = getelementptr i32, i32* %_56, i32 %_62
 	store i32 %_53, i32* %_64
 
@@ -266,8 +266,9 @@ L44:
 L43:
 	%_104 = add i32 4, %_94
 	%_95 = load i1, i1* %flag
-	%_105 = zext i1 %_95 to i8	%_106 = getelementptr i8, i8* %_98, i32 %_104
-	store i8 %_95, i8* %_106
+	%_105 = zext i1 %_95 to i8
+	%_106 = getelementptr i8, i8* %_98, i32 %_104
+	store i8 %_105, i8* %_106
 
 	%_107 = load i1, i1* %flag
 	br i1 %_107, label %L45, label %L46
@@ -301,7 +302,8 @@ L48:
 L49:
 	%_116 = load i8*, i8** %boolean_array
 	%_117 = load i32, i32* %index
-	%_118 = bitcast i8* %_116 to i32*	%_119 = load i32, i32* %_118
+	%_118 = bitcast i8* %_116 to i32*
+	%_119 = load i32, i32* %_118
 	%_120 = icmp sge i32 %_117, 0
 	%_121 = icmp slt i32 %_117, %_119
 	%_122 = and i1 %_120, %_121
@@ -310,7 +312,7 @@ L52:
 	call void @throw_oob()
 	br label %L51
 L51:
-	%_123 = add i32 1, %_117
+	%_123 = add i32 4, %_117
 	%_124 = getelementptr i8, i8* %_116, i32 %_123
 	%_125 = load i8, i8* %_124
 	%_126 = trunc i8 %_125 to i1

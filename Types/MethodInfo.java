@@ -2,8 +2,6 @@ package Types;
 import java.util.*;
 import java.util.Map.Entry;
 
-import javax.print.DocFlavor.STRING;
-
 public class MethodInfo {
 	String name;
 	String returnType;

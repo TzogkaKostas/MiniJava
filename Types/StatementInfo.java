@@ -93,6 +93,11 @@ public class StatementInfo {
 		return classInfo.variableExists(variable);
 	}
 
+	
+	public boolean isLocalVariable(String variable) {
+		return classInfo.methodHasVariable(curMethodName, variable);
+	}
+
 	public void print() {
 		classInfo.print();
 		System.out.println(curMethodName);

@@ -255,6 +255,10 @@ public class ClassInfo {
 		}
 	}
 
+	public boolean methodHasVariable(String methodName, String variable) {
+		return methods.get(methodName).getVariable(variable) == null ? false : true;
+	}
+
 	public void printMethods() {
 		for (String name: methods.keySet()){
 			methods.get(name).print();

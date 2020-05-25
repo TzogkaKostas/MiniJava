@@ -314,47 +314,43 @@ define i32 @C.get_class_x(i8* %this) {
 define i32 @C.get_method_x(i8* %this) {
 	%x = alloca i32
 
-	%_143 = getelementptr i8, i8* %this, i32 8
-	%_144 = bitcast i8* %_143 to i32*
-	store i32 3, i32* %_144
+	store i32 3, i32* %x
 
-	%_146 = getelementptr i8, i8* %this, i32 8
-	%_147 = bitcast i8* %_146 to i32*
-	%_145 = load i32, i32* %_147
-	ret i32 %_145
+	%_143 = load i32, i32* %x
+	ret i32 %_143
 }
 
 define i1 @C.set_int_x(i8* %this) {
 
-	%_148 = getelementptr i8, i8* %this, i32 8
-	%_149 = bitcast i8* %_148 to i32*
-	store i32 20, i32* %_149
+	%_144 = getelementptr i8, i8* %this, i32 8
+	%_145 = bitcast i8* %_144 to i32*
+	store i32 20, i32* %_145
 
 	ret i1 1
 }
 
 define i1 @D.get_class_x2(i8* %this) {
 
-	%_151 = getelementptr i8, i8* %this, i32 12
-	%_152 = bitcast i8* %_151 to i1*
-	%_150 = load i1, i1* %_152
-	ret i1 %_150
+	%_147 = getelementptr i8, i8* %this, i32 12
+	%_148 = bitcast i8* %_147 to i1*
+	%_146 = load i1, i1* %_148
+	ret i1 %_146
 }
 
 define i1 @E.set_bool_x(i8* %this) {
 
-	%_153 = getelementptr i8, i8* %this, i32 13
-	%_154 = bitcast i8* %_153 to i1*
-	store i1 1, i1* %_154
+	%_149 = getelementptr i8, i8* %this, i32 13
+	%_150 = bitcast i8* %_149 to i1*
+	store i1 1, i1* %_150
 
 	ret i1 1
 }
 
 define i1 @E.get_bool_x(i8* %this) {
 
-	%_156 = getelementptr i8, i8* %this, i32 13
-	%_157 = bitcast i8* %_156 to i1*
-	%_155 = load i1, i1* %_157
-	ret i1 %_155
+	%_152 = getelementptr i8, i8* %this, i32 13
+	%_153 = bitcast i8* %_152 to i1*
+	%_151 = load i1, i1* %_153
+	ret i1 %_151
 }
 

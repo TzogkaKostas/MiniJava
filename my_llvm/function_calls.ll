@@ -119,7 +119,7 @@ L8:
 L7:
 	%_38 = add i32 1, %_27
 	%_28 = load i32, i32* %i
-	%_29 =  mul i32 %_28, 2
+	%_29 = mul i32 %_28, 2
 	%_40 = getelementptr i32, i32* %_32, i32 %_38
 	store i32 %_29, i32* %_40
 
@@ -157,8 +157,9 @@ L13:
 L12:
 	%_58 = add i32 4, %_48
 	%_49 = load i1, i1* %flag
-	%_59 = zext i1 %_49 to i8	%_60 = getelementptr i8, i8* %_52, i32 %_58
-	store i8 %_49, i8* %_60
+	%_59 = zext i1 %_49 to i8
+	%_60 = getelementptr i8, i8* %_52, i32 %_58
+	store i8 %_59, i8* %_60
 
 	%_61 = load i1, i1* %flag
 	br i1 %_61, label %L14, label %L15
@@ -332,35 +333,30 @@ L11:
 	%_236 = load i8*, i8** %_235
 	%_237 = bitcast i8* %_236 to i8* (i8*, i8*)*
 	%_238 = call i8* %_237(i8* %_231, i8* %_232)
-	%_239 = trunc i8 %_238 to i1
 	%_240 = bitcast i8* %_230 to i8***
 	%_241 = load i8**, i8*** %_240
 	%_242 = getelementptr i8*, i8** %_241, i32 3
 	%_243 = load i8*, i8** %_242
 	%_244 = bitcast i8* %_243 to i8* (i8*, i8*)*
-	%_245 = call i8* %_244(i8* %_230, i8* %_239)
-	%_246 = trunc i8 %_245 to i1
+	%_245 = call i8* %_244(i8* %_230, i8* %_238)
 	%_247 = bitcast i8* %_229 to i8***
 	%_248 = load i8**, i8*** %_247
 	%_249 = getelementptr i8*, i8** %_248, i32 3
 	%_250 = load i8*, i8** %_249
 	%_251 = bitcast i8* %_250 to i8* (i8*, i8*)*
-	%_252 = call i8* %_251(i8* %_229, i8* %_246)
-	%_253 = trunc i8 %_252 to i1
+	%_252 = call i8* %_251(i8* %_229, i8* %_245)
 	%_254 = bitcast i8* %_228 to i8***
 	%_255 = load i8**, i8*** %_254
 	%_256 = getelementptr i8*, i8** %_255, i32 3
 	%_257 = load i8*, i8** %_256
 	%_258 = bitcast i8* %_257 to i8* (i8*, i8*)*
-	%_259 = call i8* %_258(i8* %_228, i8* %_253)
-	%_260 = trunc i8 %_259 to i1
+	%_259 = call i8* %_258(i8* %_228, i8* %_252)
 	%_261 = bitcast i8* %_227 to i8***
 	%_262 = load i8**, i8*** %_261
 	%_263 = getelementptr i8*, i8** %_262, i32 3
 	%_264 = load i8*, i8** %_263
 	%_265 = bitcast i8* %_264 to i8* (i8*, i8*)*
-	%_266 = call i8* %_265(i8* %_227, i8* %_260)
-	%_267 = trunc i8 %_266 to i1
+	%_266 = call i8* %_265(i8* %_227, i8* %_259)
 	%_268 = load i8*, i8** %b
 	%_269 = load i8*, i8** %b
 	%_270 = load i8*, i8** %b
@@ -402,7 +398,7 @@ L11:
 	%_311 = getelementptr i8*, i8** %_310, i32 5
 	%_312 = load i8*, i8** %_311
 	%_313 = bitcast i8* %_312 to i32 (i8*, i32, i32*, i1, i8*, i8*)*
-	%_314 = call i32 %_313(i8* %_65, i32 %_120, i32* %_169, i1 %_225, i8* %_267, i8* %_307)
+	%_314 = call i32 %_313(i8* %_65, i32 %_120, i32* %_169, i1 %_225, i8* %_266, i8* %_307)
 	store i32 %_314, i32* %i
 
 	ret i32 0
@@ -450,7 +446,7 @@ define i32 @A.decrease(i8* %this, i32 %.i) {
 	store i32 %.i, i32* %i
 
 	%_323 = load i32, i32* %i
-	%_324 =  sub i32 %_323, 1
+	%_324 = sub i32 %_323, 1
 	store i32 %_324, i32* %i
 
 	%_325 = load i32, i32* %i
@@ -548,7 +544,8 @@ L24:
 
 	%_358 = load i8*, i8** %b_arr
 	%_359 = load i32, i32* %j
-	%_360 = bitcast i8* %_358 to i32*	%_361 = load i32, i32* %_360
+	%_360 = bitcast i8* %_358 to i32*
+	%_361 = load i32, i32* %_360
 	%_362 = icmp sge i32 %_359, 0
 	%_363 = icmp slt i32 %_359, %_361
 	%_364 = and i1 %_362, %_363
@@ -557,7 +554,7 @@ L26:
 	call void @throw_oob()
 	br label %L25
 L25:
-	%_365 = add i32 1, %_359
+	%_365 = add i32 4, %_359
 	%_366 = getelementptr i8, i8* %_358, i32 %_365
 	%_367 = load i8, i8* %_366
 	%_368 = trunc i8 %_367 to i1

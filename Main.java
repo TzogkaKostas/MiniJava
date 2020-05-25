@@ -73,7 +73,7 @@ class Main {
 					offsetTable);
 			root.accept(generationVisitor, null);
 			
-			fileWriter = new FileWriter("my_llvm/" + getBaseName(fileName) + ".ll");
+			fileWriter = new FileWriter("llvm/" + getBaseName(fileName) + ".ll");
 			fileWriter.write(generationVisitor.getCodeBuffer());
 			fileWriter.flush();
 
