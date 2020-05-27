@@ -20,6 +20,7 @@ class BT {
 		System.out.println(100000000);
 		ntb = root.Insert(8);
 		ntb = root.Print();
+		System.out.println(100000000);
 		ntb = root.Insert(24) ;
 		ntb = root.Insert(4) ;
 		ntb = root.Insert(12) ;
@@ -27,6 +28,7 @@ class BT {
 		ntb = root.Insert(28) ;
 		ntb = root.Insert(14) ;
 		ntb = root.Print();
+		System.out.println(100000000);
 		System.out.println(root.Search(24));
 		System.out.println(root.Search(12));
 		System.out.println(root.Search(16));
@@ -34,6 +36,7 @@ class BT {
 		System.out.println(root.Search(12));
 		ntb = root.Delete(12);
 		ntb = root.Print();
+		System.out.println(100000000);
 		System.out.println(root.Search(12));
 
 		return 0;

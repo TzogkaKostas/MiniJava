@@ -386,7 +386,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String falseLabel = newLabel();
 		String endLabel = newLabel();
 	
-		// check the conditions
+		// check the condition
 		String ifCode = exprInfo.getCode();
 		ifCode += "\tbr i1 " + exprInfo.getResult() + ", label %" + 
 				trueLabel + ", label %" + falseLabel + "\n";
@@ -636,7 +636,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		// array's index is valid
 		lookupCode += label1 + ":\n";
 
-		// positions allocated for array's length
+		// calculate positions allocated for array's length
 		String lengthIndex = type1.equals("boolean[]") ? "4" : "1";
 
 		// add length's positions to the index
@@ -718,7 +718,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		String t5 = newTemp();
 		String result = newTemp();
 
-		// generate code for each argument
+		// generate code for each method argument
 		String messageCode = exprInfo.getCode() + getMethodArgsCode(args);
 
 		// get object's v_table
@@ -863,8 +863,7 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 				String t1 = newTemp();
 				String t2 = newTemp();
 
-				// v_table pointer is stored on object's first 8 bytes
-				// so we need to add 8 to object's pointer
+				// add 8 in order to skip object's v_table pointer
 				Integer varOffset = getVarOffset(statementInfo.getClassInfo(), variable) + 8;
 				idCode = "\t" + t1 + " = getelementptr i8, i8* %this, i32 " + varOffset + "\n";
 				idCode += "\t" + t2 + " = bitcast i8* " + t1 + " to " + getIRType(type) + "*\n";
@@ -932,12 +931,12 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		// we need 4 more positions/bytes for array's length
 		boolArrayCode += "\t" + t1 + " = add i32 4, " + exprInfo.getResult() + "\n";
 
-		// check if allocation size is greater or equal than 4
+		// check if allocation size is greater or equal to 4
 		boolArrayCode += "\t" + t2 + " = icmp sge i32 " + t1 + ", 4\n";
 		boolArrayCode += "\tbr i1 " + t2 + ", label %" + label1 + ", label %" + 
 				label2 + "\n";
 
-		// if allocation size is negative, throw negative size
+		// if allocation size is negative, throw negative size exception
 		boolArrayCode += label2 + ":\n";
 		boolArrayCode += "\tcall void @throw_nsz()\n";
 		boolArrayCode += "\tbr label %" + label1 + "\n";
@@ -976,11 +975,11 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		// we need 1 more position (4 bytes) for array's length
 		intArrayCode += "\t" + t1 + " = add i32 1, " + exprInfo.getResult() + "\n";
 
-		// check if allocation size is greater or equal than 1
+		// check if allocation size is greater or equal to 1
 		intArrayCode += "\t" + t2 + " = icmp sge i32 " + t1 + ", 1\n";
 		intArrayCode += "\tbr i1 " + t2 + ", label %" + label1 + ", label %" + label2 + "\n";
 
-		// if allocation size is negative, throw negative size
+		// if allocation size is negative, throw negative size exception
 		intArrayCode += label2 + ":\n";
 		intArrayCode += "\tcall void @throw_nsz()\n";
 		intArrayCode += "\tbr label %" + label1 + "\n";
@@ -1019,11 +1018,11 @@ public class GenerationVisitor extends GJDepthFirst<Object, Object> {
 		// bitcast is needed because object's v_table needs to be stored
 		allocationCode += "\t" + t2 + " = bitcast i8* " + t1 + " to i8***\n";
 
-		// get object's v_table
+		// get object's v_table pointer
 		allocationCode += "\t" + t3 + " = getelementptr [" + numOfMethods + " x i8*], [" + 
 				numOfMethods + " x i8*]* @." + identifier + "_vtable, i32 0, i32 0\n";
 		
-		// store the pointer at object's first 8 bytes
+		// store v_table pointer at object's first 8 bytes
 		allocationCode += "\tstore i8** " + t3 + ", i8*** " + t2 + "\n";
 
 		return new ExpressionInfo("new", identifier, "", t1, allocationCode);

@@ -73,13 +73,13 @@ class Main {
 					offsetTable);
 			root.accept(generationVisitor, null);
 			
-			fileWriter = new FileWriter("my_llvm/" + getBaseName(fileName) + ".ll");
+			fileWriter = new FileWriter(getBaseName(fileName) + ".ll");
 			fileWriter.write(generationVisitor.getCodeBuffer());
 			fileWriter.flush();
 
 
 		} catch (IOException e) {
-			System.out.println("my_llvm/" + getBaseName(fileName) + ".ll");
+			System.out.println(getBaseName(fileName) + ".ll");
 			e.printStackTrace();
 		} catch (ParseException ex) {
 			System.out.println(ex.getMessage());
