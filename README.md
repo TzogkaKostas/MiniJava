@@ -4,6 +4,7 @@ MiniJava Code into the intermediate representation (IR) used by the LLVM
 compiler project.
 
 ## Execution: 
-./run.sh <filename.java>
+./run.sh <file1.java> <file2.java> <file3.java> ...
 
-MiniJava files can be found on codegen_java and examples folders.
+MiniJava files can be found on 'baziotis_java' and 'examples' folders. Output is
+stored on files named <file1.ll>, <file2.ll>, <file3.ll>, ...
